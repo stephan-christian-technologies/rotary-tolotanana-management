@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/operation.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
+import 'package:rc_rtc_tolotanana/views/pages/edition_details_view.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/add_textfield.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/custom_appbar.dart';
+import 'package:uuid/uuid.dart';
 
-import '../../services/database_client.dart';
+import '../../services/database.dart';
 
 class AddPatientView extends StatefulWidget {
-  final int editionId;
-  const AddPatientView({super.key, required this.editionId});
+  final Edition edition;
+  const AddPatientView({super.key, required this.edition});
 
   @override
   State<AddPatientView> createState() => _AddPatientViewState();
@@ -330,7 +333,7 @@ class _AddPatientViewState extends State<AddPatientView> {
     FocusScope.of(context).requestFocus(FocusNode());
     // si nom est vide, ne rien faire
     if (nameController.text.isEmpty) return;
-    Map<String, dynamic> map = {'edition': widget.editionId};
+    Map<String, dynamic> map = {'edition': widget.edition.id};
     map['lastName'] = nameController.text;
     map['firstName'] = firstNameController.text;
     map['age'] = int.parse(ageController.text);
@@ -343,19 +346,20 @@ class _AddPatientViewState extends State<AddPatientView> {
     map['commentaire'] = commentaireController.text;
     map['birthDate'] = dateNaissanceController.text;
 
-    print(map);
-
     // map['name'] = nameController.text;
     // if (shopController.text.isNotEmpty) map['shop'] = shopController.text;
     // double price = double.tryParse(priceController.text) ?? 0.0;
     // map['price'] = price;
     // if (imagePath != null) map['image'] = imagePath;
+    const uuid = Uuid();
+    map['id'] = uuid.v4();
     Patient patient = Patient.fromMap(map);
     // DatabaseClient().upsert(patient).then((value) => Navigator.pop(context));
     //upsert patient then get its id
-    await DatabaseClient().upsert(patient);
+    await DatabaseClient().insert(patient);
     //get patient id
-    final patientId = await DatabaseClient().getPatientId(patient.lastname);
+    // final patientId = await DatabaseClient().getPatientId(patient.lastname);
+    final patientId = patient.id;
 
     for (var operation in typeOperationController!) {
       //get operation id according to its name
@@ -367,6 +371,10 @@ class _AddPatientViewState extends State<AddPatientView> {
     ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('${patient.lastname} ajouté avec succès')));
 
-    Navigator.pop(context);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+      return EditionDetailsView(
+        edition: widget.edition,
+      );
+    }));
   }
 }

@@ -1,5 +1,5 @@
 class Edition {
-  int id;
+  String id;
   int year;
   String city;
 

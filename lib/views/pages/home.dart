@@ -4,7 +4,7 @@ import 'package:rc_rtc_tolotanana/views/tiles/edition_tile.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/add_dialog.dart';
 
 import '../../models/edition.dart';
-import '../../services/database_client.dart';
+import '../../services/database.dart';
 import '../widgets/custom_appbar.dart';
 
 class Home extends StatefulWidget {

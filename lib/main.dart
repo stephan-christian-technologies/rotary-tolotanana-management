@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:rc_rtc_tolotanana/firebase_options.dart';
-import 'package:rc_rtc_tolotanana/services/database_client.dart';
+import 'package:rc_rtc_tolotanana/services/database.dart';
 
 import 'views/pages/home.dart';
 

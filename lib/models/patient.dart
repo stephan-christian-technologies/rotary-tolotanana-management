@@ -1,5 +1,7 @@
+import 'package:uuid/uuid.dart';
+
 class Patient {
-  int? id;
+  String id;
   String lastname;
   String? firstname;
   int age;
@@ -10,10 +12,10 @@ class Patient {
   String? comment;
   String? address;
   DateTime? birthDate;
-  int edition;
+  String edition;
 
   Patient(
-      {this.id,
+      {required this.id,
       required this.lastname,
       this.firstname,
       required this.age,
@@ -48,7 +50,7 @@ class Patient {
 
   factory Patient.fromMap(Map<String, dynamic> data) {
     return Patient(
-      id: data['id'],
+      id: data['id'] ?? const Uuid().v4(),
       lastname: data['lastName'],
       firstname: data['firstName'],
       age: data['age'],

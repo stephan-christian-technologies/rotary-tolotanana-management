@@ -5,7 +5,7 @@ import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/views/pages/add_patient_view.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/custom_appbar.dart';
 
-import '../../services/database_client.dart';
+import '../../services/database.dart';
 
 class EditionDetailsView extends StatefulWidget {
   final Edition edition;
@@ -334,7 +334,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
   }
 
   addNewItem() {
-    final next = AddPatientView(editionId: widget.edition.id);
+    final next = AddPatientView(edition: widget.edition);
     Navigator.push(context, MaterialPageRoute(builder: (context) => next))
         .then((value) => getPatients());
   }
@@ -370,7 +370,6 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
         break;
       }
     }
-    print('count: $count');
     return count;
   }
 }

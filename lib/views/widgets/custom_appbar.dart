@@ -19,7 +19,6 @@ class CustomAppBar extends AppBar {
               ))
         ]);
 
-  @override
   Widget build(BuildContext context) {
     return const Placeholder();
   }

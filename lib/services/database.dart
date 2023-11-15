@@ -7,17 +7,11 @@ import 'package:rc_rtc_tolotanana/models/operation.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/models/patient_operation.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/edition.dart';
 
 class DatabaseClient {
-  //2 tables
-  //1. liste de souhaits table. ex: liste informatique, liste de cadeaux (nom, id)
-  //2. liste de souhaits items table. ex: ps5, clavier (nom, prix, magasin, image, id de la liste, id de l'item)
-  //INTEGER, TEXT, REAL
-  //INTEGER PRIMARY KEY pour id unique
-  //TEXT NOT NULL
-
   // acceder a la DB
   Database? _database;
 
@@ -40,14 +34,14 @@ class DatabaseClient {
   onCreate(Database database, int version) async {
     await database.execute('''
         CREATE TABLE edition (
-          id INTEGER PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           year INTEGER NOT NULL,
           city TEXT NOT NULL
         )
       ''');
     await database.execute('''
         CREATE TABLE patient (
-          id INTEGER PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           lastName TEXT NOT NULL,
           firstName TEXT NOT NULL,
           age INTEGER NOT NULL,
@@ -70,7 +64,7 @@ class DatabaseClient {
       ''');
     await database.execute('''
         CREATE TABLE patient_operation (
-          id INTEGER PRIMARY KEY,
+          id TEXT PRIMARY KEY,
           patient INTEGER,
           operation INTEGER,
           FOREIGN KEY(patient) REFERENCES patient(id),
@@ -211,24 +205,30 @@ class DatabaseClient {
 
   //Ajouter données
   Future<bool> addEdition(int year, String city) async {
-    //recuperer le DB
     Database db = await database;
-    // inserer dans la DB
-    await db.insert("edition", {"year": year, "city": city});
-    //notifier le changement terminé
+    final id = generateUuid();
+    await db.insert("edition", {"id": id, "year": year, "city": city});
     return true;
   }
 
   //Upsert patient
   Future<bool> upsert(Patient patient) async {
-    //recuperer le DB
     Database db = await database;
     if (patient.id == null) {
-      patient.id = await db.insert('patient', patient.toMap());
+      final id = generateUuid();
+      patient.id = id;
+      await db.insert('patient', patient.toMap());
     } else {
       await db.update('patient', patient.toMap(),
           where: 'id = ?', whereArgs: [patient.id]);
     }
+    return true;
+  }
+
+  //Insert patient
+  Future<bool> insert(Patient patient) async {
+    Database db = await database;
+    await db.insert('patient', patient.toMap());
     return true;
   }
 
@@ -245,7 +245,7 @@ class DatabaseClient {
   }
 
   //Obtenir les items
-  Future<List<Patient>> patientFromEdition(int id) async {
+  Future<List<Patient>> patientFromEdition(String id) async {
     //recuperer le DB
     Database db = await database;
 
@@ -259,7 +259,7 @@ class DatabaseClient {
   }
 
   //get patient id from lastname
-  Future<int> getPatientId(String lastname) async {
+  Future<String> getPatientId(String lastname) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
@@ -272,12 +272,11 @@ class DatabaseClient {
   }
 
   //add patient_operation
-  Future<bool> addPatientOperation(int patientId, int operationId) async {
-    //recuperer le DB
+  Future<bool> addPatientOperation(String patientId, int operationId) async {
     Database db = await database;
-    // inserer dans la DB
-    await db.insert(
-        "patient_operation", {"patient": patientId, "operation": operationId});
+    final id = generateUuid();
+    await db.insert("patient_operation",
+        {"id": id, "patient": patientId, "operation": operationId});
     //notifier le changement terminé
     return true;
   }
@@ -381,5 +380,10 @@ class DatabaseClient {
     const query = "SELECT sex, COUNT(*) FROM patient GROUP BY sex";
     List<Map<String, dynamic>> results = await db.rawQuery(query);
     return results;
+  }
+
+  String generateUuid() {
+    var uuid = const Uuid();
+    return uuid.v4();
   }
 }
