@@ -87,21 +87,37 @@ class DatabaseClient {
   final DatabaseReference _patientOperationsRef =
       FirebaseDatabase.instance.ref('patient_operations');
 
-  // Synchroniser les éditions avec Firebase
+  // Synchroniser les éditions vers Firebase
   Future<void> syncEditionsWithFirebase(List<Edition> editions) async {
     for (Edition edition in editions) {
-      await _editionsRef.child(edition.id.toString()).set(edition.toMap());
+      try {
+        // Check if edition already exists in Firebase
+        DataSnapshot dataSnapshot =
+            await _editionsRef.child(edition.id.toString()).get();
+
+        if (dataSnapshot.value == null) {
+          // Edition doesn't exist, so set it in Firebase
+          await _editionsRef.child(edition.id.toString()).set(edition.toMap());
+        } else {
+          // Edition already exists, skip it
+          print(
+              'Edition with ID ${edition.id} already exists in Firebase. Skipped.');
+        }
+      } catch (error) {
+        // Handle any errors that might occur during Firebase operations
+        print('Error syncing edition with ID ${edition.id}: $error');
+      }
     }
   }
 
-  // Synchroniser les patients avec Firebase
+  // Synchroniser les patients vers Firebase
   Future<void> syncPatientsWithFirebase(List<Patient> patients) async {
     for (Patient patient in patients) {
       await _patientsRef.child(patient.id.toString()).set(patient.toMap());
     }
   }
 
-  // Synchroniser les opérations avec Firebase
+  // Synchroniser les opérations vers Firebase
   Future<void> syncOperationsWithFirebase(List<Operation> operations) async {
     for (Operation operation in operations) {
       await _operationsRef
@@ -110,7 +126,7 @@ class DatabaseClient {
     }
   }
 
-  // Synchroniser les relations patient-opération avec Firebase
+  // Synchroniser les relations patient-opération vers Firebase
   Future<void> syncPatientOperationsWithFirebase(
       List<PatientOperation> patientOperations) async {
     for (PatientOperation patientOperation in patientOperations) {
@@ -130,6 +146,146 @@ class DatabaseClient {
     await syncPatientsWithFirebase(patients);
     await syncOperationsWithFirebase(operations);
     await syncPatientOperationsWithFirebase(patientOperations);
+  }
+
+  Future<void> syncFirebaseDataToLocalStorage() async {
+    List<Edition> editions = await _getEditionsFromFirebase();
+    List<Patient> patients = await _getPatientsFromFirebase();
+    List<PatientOperation> patientOperations =
+        await _getPatientOperationsFromFirebase();
+
+    await _deleteAllEditions();
+    await _deleteAllPatients();
+    await _deleteAllOperations();
+    await _deleteAllPatientOperations();
+
+    await syncEditionsToLocalStorage(editions);
+    await syncPatientsToLocalStorage(patients);
+    await syncPatientOperationsToLocalStorage(patientOperations);
+  }
+
+  Future<List<Edition>> _getEditionsFromFirebase() async {
+    List<Edition> editions = [];
+    DataSnapshot dataSnapshot = await _editionsRef.get();
+    Map<dynamic, dynamic> editionsMap =
+        dataSnapshot.value as Map<dynamic, dynamic>;
+    editionsMap.forEach((key, value) async {
+      final id = value['id'];
+      final year = value['year'];
+      final city = value['city'];
+
+      //search for the edition in the local storage
+      //if it doesn't exist, add it
+      //if it exists, do nothing
+
+      final edition = await getEdition(id);
+      if (edition == null) {
+        editions.add(Edition(id, year, city));
+      } else {
+        print('Edition with ID $id already exists in local storage. Skipped.');
+      }
+    });
+    return editions;
+  }
+
+  Future<List<Patient>> _getPatientsFromFirebase() async {
+    List<Patient> patients = [];
+    DataSnapshot dataSnapshot = await _patientsRef.get();
+    Map<dynamic, dynamic> patientsMap =
+        dataSnapshot.value as Map<dynamic, dynamic>;
+    patientsMap.forEach((key, value) {
+      final id = value['id'];
+      final firstname = value['firstname'];
+      final lastname = value['lastname'];
+      final address = value['address'];
+      final age = value['age'];
+      final anesthesiaType = value['anesthesiaType'];
+      final observation = value['observation'];
+      final sex = value['sex'];
+      final telephone = value['telephone'];
+      final edition = value['edition'];
+      final birthDate = value['birthDate'];
+      final comment = value['comment'] ?? '';
+
+      patients.add(Patient(
+          id: id,
+          lastname: lastname,
+          age: age,
+          sex: sex,
+          anesthesiaType: anesthesiaType,
+          telephone: telephone,
+          observation: observation,
+          edition: edition,
+          comment: comment));
+    });
+    return patients;
+  }
+
+  Future<List<Operation>> _getOperationsFromFirebase() async {
+    List<Operation> operations = [];
+    DataSnapshot dataSnapshot = await _operationsRef.get();
+    Map<dynamic, dynamic> operationsMap =
+        dataSnapshot.value as Map<dynamic, dynamic>;
+    // print('operationsMap: $operationsMap \n\n');
+    operationsMap.forEach((key, value) {
+      // print('key: $key, value: $value');
+      // operations.add(Operation.fromMap(value));
+    });
+    return operations;
+  }
+
+  Future<List<PatientOperation>> _getPatientOperationsFromFirebase() async {
+    List<PatientOperation> patientOperations = [];
+    DataSnapshot dataSnapshot = await _patientOperationsRef.get();
+    Map<dynamic, dynamic> patientOperationsMap =
+        dataSnapshot.value as Map<dynamic, dynamic>;
+    // print('patientOperationsMap: $patientOperationsMap \n\n');
+    patientOperationsMap.forEach((key, value) {
+      // print('$value \n');
+      // var patientOperation = PatientOperation.fromJson(value as Map<String, dynamic>);
+      // patientOperations.add(PatientOperation.fromJson(value));
+    });
+    return patientOperations;
+  }
+
+  Future<void> _deleteAllEditions() async {
+    Database db = await database;
+    await db.delete("edition");
+  }
+
+  Future<void> _deleteAllPatients() async {
+    Database db = await database;
+    await db.delete("patient");
+  }
+
+  Future<void> _deleteAllOperations() async {
+    Database db = await database;
+    await db.delete("operation");
+  }
+
+  Future<void> _deleteAllPatientOperations() async {
+    Database db = await database;
+    await db.delete("patient_operation");
+  }
+
+  Future<void> syncEditionsToLocalStorage(List<Edition> editions) async {
+    for (Edition edition in editions) {
+      await addEdition(edition.id, edition.year, edition.city);
+    }
+  }
+
+  Future<void> syncPatientsToLocalStorage(List<Patient> patients) async {
+    for (Patient patient in patients) {
+      await upsert(patient);
+    }
+  }
+
+  Future<void> syncPatientOperationsToLocalStorage(
+      List<PatientOperation> patientOperations) async {
+    for (PatientOperation patientOperation in patientOperations) {
+      await addPatientOperation(patientOperation.patientId!,
+          int.parse(patientOperation.operationId!));
+    }
   }
 
   //list of all patients
@@ -204,10 +360,10 @@ class DatabaseClient {
   }
 
   //Ajouter données
-  Future<bool> addEdition(int year, String city) async {
+  Future<bool> addEdition(String? id, int year, String city) async {
     Database db = await database;
-    final id = generateUuid();
-    await db.insert("edition", {"id": id, "year": year, "city": city});
+    final newId = generateUuid();
+    await db.insert("edition", {"id": id ?? newId, "year": year, "city": city});
     return true;
   }
 
@@ -256,6 +412,36 @@ class DatabaseClient {
     // List<Map<String, dynamic>> results = await db.rawQuery(query, [id]);
 
     return results.map((map) => Patient.fromMap(map)).toList();
+  }
+
+  //get patient from id
+  Future<Patient> getPatient(String id) async {
+    //recuperer le DB
+    Database db = await database;
+    //faire une query ou demande
+    const query = 'SELECT * FROM patient WHERE id = ?';
+    //recuperer les resultats
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [id]);
+    //List<Map<String, dynamic>> results = await db.query("list");
+
+    return Patient.fromMap(results[0]);
+  }
+
+  //get edition from id
+  Future<Edition?> getEdition(String id) async {
+    //recuperer le DB
+    Database db = await database;
+    //faire une query ou demande
+    const query = 'SELECT * FROM edition WHERE id = ?';
+    //recuperer les resultats
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [id]);
+    //List<Map<String, dynamic>> results = await db.query("list");
+
+    if (results.isEmpty) {
+      return null;
+    } else {
+      return Edition.fromMap(results[0]);
+    }
   }
 
   //get patient id from lastname

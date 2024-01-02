@@ -66,8 +66,8 @@ class _HomeState extends State<Home> {
                 if (cityController.text.isEmpty) return;
                 //ajouter a la DB et rafraichir la liste
                 DatabaseClient()
-                    .addEdition(
-                        int.parse(yearController.text), cityController.text)
+                    .addEdition(null, int.parse(yearController.text),
+                        cityController.text)
                     .then((success) => getEditions());
               }));
         });
