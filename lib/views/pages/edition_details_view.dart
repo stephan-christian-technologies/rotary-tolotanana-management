@@ -343,6 +343,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
     DatabaseClient().patientFromEdition(widget.edition.id).then((patients) {
       setState(() {
         this.patients = patients;
+        print('Patients: ${this.patients.length}');
       });
     });
   }

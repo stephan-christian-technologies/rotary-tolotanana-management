@@ -174,10 +174,6 @@ class DatabaseClient {
       final year = value['year'];
       final city = value['city'];
 
-      //search for the edition in the local storage
-      //if it doesn't exist, add it
-      //if it exists, do nothing
-
       final edition = await getEdition(id);
       if (edition == null) {
         editions.add(Edition(id, year, city));
@@ -210,9 +206,12 @@ class DatabaseClient {
       patients.add(Patient(
           id: id,
           lastname: lastname,
+          firstname: firstname,
           age: age,
           sex: sex,
           anesthesiaType: anesthesiaType,
+          birthDate: DateTime.parse(birthDate),
+          address: address,
           telephone: telephone,
           observation: observation,
           edition: edition,
@@ -221,29 +220,18 @@ class DatabaseClient {
     return patients;
   }
 
-  Future<List<Operation>> _getOperationsFromFirebase() async {
-    List<Operation> operations = [];
-    DataSnapshot dataSnapshot = await _operationsRef.get();
-    Map<dynamic, dynamic> operationsMap =
-        dataSnapshot.value as Map<dynamic, dynamic>;
-    // print('operationsMap: $operationsMap \n\n');
-    operationsMap.forEach((key, value) {
-      // print('key: $key, value: $value');
-      // operations.add(Operation.fromMap(value));
-    });
-    return operations;
-  }
-
   Future<List<PatientOperation>> _getPatientOperationsFromFirebase() async {
     List<PatientOperation> patientOperations = [];
     DataSnapshot dataSnapshot = await _patientOperationsRef.get();
     Map<dynamic, dynamic> patientOperationsMap =
         dataSnapshot.value as Map<dynamic, dynamic>;
-    // print('patientOperationsMap: $patientOperationsMap \n\n');
     patientOperationsMap.forEach((key, value) {
-      // print('$value \n');
-      // var patientOperation = PatientOperation.fromJson(value as Map<String, dynamic>);
-      // patientOperations.add(PatientOperation.fromJson(value));
+      final id = value['id'];
+      final patientId = value['patient'];
+      final operationId = value['operation'];
+
+      patientOperations.add(PatientOperation(
+          id: id, patientId: patientId, operationId: operationId));
     });
     return patientOperations;
   }
@@ -276,14 +264,16 @@ class DatabaseClient {
 
   Future<void> syncPatientsToLocalStorage(List<Patient> patients) async {
     for (Patient patient in patients) {
-      await upsert(patient);
+      await insert(patient);
     }
   }
 
   Future<void> syncPatientOperationsToLocalStorage(
       List<PatientOperation> patientOperations) async {
     for (PatientOperation patientOperation in patientOperations) {
-      await addPatientOperation(patientOperation.patientId!,
+      await addPatientOperation(
+          patientOperation.id,
+          patientOperation.patientId!,
           int.parse(patientOperation.operationId!));
     }
   }
@@ -363,7 +353,8 @@ class DatabaseClient {
   Future<bool> addEdition(String? id, int year, String city) async {
     Database db = await database;
     final newId = generateUuid();
-    await db.insert("edition", {"id": id ?? newId, "year": year, "city": city});
+    await db.insert("edition", {"id": id ?? newId, "year": year, "city": city},
+        conflictAlgorithm: ConflictAlgorithm.ignore);
     return true;
   }
 
@@ -384,7 +375,8 @@ class DatabaseClient {
   //Insert patient
   Future<bool> insert(Patient patient) async {
     Database db = await database;
-    await db.insert('patient', patient.toMap());
+    await db.insert('patient', patient.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore);
     return true;
   }
 
@@ -458,11 +450,17 @@ class DatabaseClient {
   }
 
   //add patient_operation
-  Future<bool> addPatientOperation(String patientId, int operationId) async {
+  Future<bool> addPatientOperation(
+      String? id, String patientId, int operationId) async {
     Database db = await database;
-    final id = generateUuid();
-    await db.insert("patient_operation",
-        {"id": id, "patient": patientId, "operation": operationId});
+    await db.insert(
+        "patient_operation",
+        {
+          "id": id ?? generateUuid(),
+          "patient": patientId,
+          "operation": operationId
+        },
+        conflictAlgorithm: ConflictAlgorithm.ignore);
     //notifier le changement terminé
     return true;
   }

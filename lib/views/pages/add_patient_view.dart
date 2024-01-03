@@ -365,7 +365,7 @@ class _AddPatientViewState extends State<AddPatientView> {
       //get operation id according to its name
       final operationId = await DatabaseClient().getOperationId(operation);
       //add patient_operation
-      await DatabaseClient().addPatientOperation(patientId, operationId);
+      await DatabaseClient().addPatientOperation(null, patientId, operationId);
     }
     //show snackbar
     ScaffoldMessenger.of(context).showSnackBar(
