@@ -479,52 +479,52 @@ class DatabaseClient {
   }
 
   //get number of patients
-  Future<int> getNumberOfPatients() async {
+  Future<int> getNumberOfPatients(String editionId) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
-    const query = 'SELECT COUNT(*) FROM patient';
+    const query = 'SELECT COUNT(*) FROM patient WHERE edition = ?';
     //recuperer les resultats
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
 
     return results[0]['COUNT(*)'];
   }
 
   //get the minimum patient age
-  Future<int> getMinAge() async {
+  Future<int> getMinAge(String editionId) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
-    const query = 'SELECT MIN(age) FROM patient';
+    const query = 'SELECT MIN(age) FROM patient WHERE edition = ?';
     //recuperer les resultats
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
 
     return results[0]['MIN(age)'] ?? 0;
   }
 
   //get the maximum patient age
-  Future<int> getMaxAge() async {
+  Future<int> getMaxAge(String editionId) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
-    const query = 'SELECT MAX(age) FROM patient';
+    const query = 'SELECT MAX(age) FROM patient WHERE edition = ?';
     //recuperer les resultats
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
 
     return results[0]['MAX(age)'] ?? 0;
   }
 
   //get the average patient age
-  Future<int> getAverageAge() async {
+  Future<int> getAverageAge(String editionId) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
-    const query = 'SELECT AVG(age) FROM patient';
+    const query = 'SELECT AVG(age) FROM patient WHERE edition = ?';
     //recuperer les resultats
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
 
     return results[0]['AVG(age)']?.toInt() ?? 0;
@@ -545,24 +545,26 @@ class DatabaseClient {
   }
 
   //get number of patient per observation
-  Future<List<Map<String, dynamic>>> getPatientPerObservation() async {
+  Future<List<Map<String, dynamic>>> getPatientPerObservation(
+      String editionId) async {
     //recuperer le DB
     Database db = await database;
     //faire une query ou demande
     const query =
-        'SELECT observation, COUNT(*) FROM patient GROUP BY observation';
+        'SELECT observation, COUNT(*) FROM patient GROUP BY observation WHERE edition = ?';
     //recuperer les resultats
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
 
     return results;
   }
 
   //get number of patient per sex
-  Future<List<Map<String, dynamic>>> getPatientPerSex() async {
+  Future<List<Map<String, dynamic>>> getPatientPerSex(String editionId) async {
     Database db = await database;
-    const query = "SELECT sex, COUNT(*) FROM patient GROUP BY sex";
-    List<Map<String, dynamic>> results = await db.rawQuery(query);
+    const query =
+        "SELECT sex, COUNT(*) FROM patient GROUP BY sex WHERE edition = ?";
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     return results;
   }
 

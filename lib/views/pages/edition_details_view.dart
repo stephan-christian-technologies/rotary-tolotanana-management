@@ -69,7 +69,8 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                                 fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           FutureBuilder(
-                              future: DatabaseClient().getNumberOfPatients(),
+                              future: DatabaseClient()
+                                  .getNumberOfPatients(widget.edition.id),
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState ==
                                     ConnectionState.waiting) {
@@ -88,7 +89,8 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                               }),
                           const Text('patients total'),
                           FutureBuilder(
-                              future: DatabaseClient().getPatientPerSex(),
+                              future: DatabaseClient()
+                                  .getPatientPerSex(widget.edition.id),
                               builder: (context, snapshot) {
                                 return Row(
                                   mainAxisAlignment:
@@ -134,7 +136,8 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                 )),
                 Expanded(
                   child: FutureBuilder(
-                      future: DatabaseClient().getPatientPerObservation(),
+                      future: DatabaseClient()
+                          .getPatientPerObservation(widget.edition.id),
                       builder: (context, snapshot) {
                         return Column(
                           children: [
@@ -234,7 +237,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                 title: const Text('Minimum'),
                 subtitle: const Text('Age le plus jeune'),
                 trailing: FutureBuilder(
-                    future: DatabaseClient().getMinAge(),
+                    future: DatabaseClient().getMinAge(widget.edition.id),
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();
@@ -263,7 +266,8 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                     title: const Text('Moyenne'),
                     subtitle: const Text('La moyenne d\'age'),
                     trailing: FutureBuilder(
-                        future: DatabaseClient().getAverageAge(),
+                        future:
+                            DatabaseClient().getAverageAge(widget.edition.id),
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
@@ -291,7 +295,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                   title: const Text('Maximum'),
                   subtitle: const Text('Age le plus vieux'),
                   trailing: FutureBuilder(
-                      future: DatabaseClient().getMaxAge(),
+                      future: DatabaseClient().getMaxAge(widget.edition.id),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
