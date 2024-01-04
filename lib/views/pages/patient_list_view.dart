@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
+import 'package:rc_rtc_tolotanana/utils/csv_utils.dart';
 
 class PatientListView extends StatefulWidget {
   const PatientListView({
@@ -32,6 +33,13 @@ class _PatientListViewState extends State<PatientListView> {
               //   context: context,
               //   delegate: PatientSearchDelegate(),
               // );
+            },
+          ),
+          //export data to csv
+          IconButton(
+            icon: const Icon(Icons.file_download),
+            onPressed: () async {
+              await patientsByEdtionToCsv(widget.edition.id, context);
             },
           ),
         ],
