@@ -1,26 +1,24 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
-import 'package:share_plus/share_plus.dart';
-
-patientsByEdtionToCsv(String editionId, BuildContext context) async {
+patientsByEdtionToCsv(Edition edition, BuildContext context) async {
   //get patients by edition id from database then convert to csv
   List<Patient> patients =
-      await DatabaseClient().getPatientsByEditionId(editionId);
+      await DatabaseClient().getPatientsByEditionId(edition.id);
   //convert patients to csv
-  await savePatientsToCSV(patients, context);
+  await savePatientsToCSV(patients, context, edition);
 }
 
 Future<void> savePatientsToCSV(
-    List<Patient> patients, BuildContext context) async {
+    List<Patient> patients, BuildContext context, Edition edition) async {
   List<List<dynamic>> csvData = [];
 
   // Add CSV header
@@ -30,7 +28,8 @@ Future<void> savePatientsToCSV(
     'firstname',
     'age',
     'sex',
-    'anesthesiaType',
+    'operation'
+        'anesthesiaType',
     'telephone',
     'observation',
     'comment',
@@ -42,18 +41,38 @@ Future<void> savePatientsToCSV(
   // Add patient data
   for (Patient patient in patients) {
     count++;
+
+    final operations =
+        await DatabaseClient().getPatientOperationByPatientId(patient.id);
+    String operation = operations.toString();
+    if (operations.length > 1) {
+      //join operations with -
+      List<String> operationList = [];
+      for (var operation in operations) {
+        operationList.add(operation['name'].toString().split('.').last);
+      }
+      operation = operationList.join('-');
+    } else if (operations.length == 1) {
+      operation = operations[0]['name'].toString().split('.').last;
+    } else {
+      operation = '';
+    }
+
     csvData.add([
       count.toString(),
       patient.lastname,
-      patient.firstname ?? '',
+      patient.firstname ?? '-',
       patient.age,
-      patient.sex.toString().split('.').last, // Convert enum to string
+      patient.sex.toString().split('.').last == '0'
+          ? 'H'
+          : 'F', // Convert enum to string
+      operation,
       patient.anesthesiaType.split('.').last,
       patient.telephone,
-      patient.observation,
-      patient.comment ?? '',
-      patient.address ?? '',
-      patient.birthDate?.toIso8601String() ?? '',
+      patient.observation == 1 ? 'Apte' : 'Inapte',
+      patient.comment ?? '-',
+      patient.address ?? '-',
+      patient.birthDate?.toIso8601String().split('T').first,
     ]);
   }
 
@@ -63,7 +82,8 @@ Future<void> savePatientsToCSV(
 
   // Get the document directory
   final directory = await getExternalStorageDirectory();
-  final path = '${directory?.path}/patients.csv';
+  final path =
+      '${directory?.path}/patients_${edition.city}_${edition.year}.csv';
 
   // Write the CSV string to a file
   await File(path).writeAsString(csvString);
@@ -95,7 +115,6 @@ Future<void> savePatientsToCSV(
             child: const Text('Partager'),
             onPressed: () async {
               print('Sharing $path...');
-              final result = await Share.shareFiles([path]);
             },
           ),
         ],

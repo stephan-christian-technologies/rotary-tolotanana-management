@@ -498,6 +498,21 @@ class DatabaseClient {
     return results.map((map) => Patient.fromMap(map)).toList();
   }
 
+  //get patient_operation by patient id, group by patient id
+  Future<List<Map<String, dynamic>>> getPatientOperationByPatientId(
+      String patientId) async {
+    //recuperer le DB
+    Database db = await database;
+    //faire une query ou demande
+    const query =
+        'SELECT operation.name FROM patient_operation INNER JOIN operation ON patient_operation.operation = operation.id WHERE patient = ? GROUP BY operation.name';
+    //recuperer les resultats
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [patientId]);
+    //List<Map<String, dynamic>> results = await db.query("list");
+    print(results);
+    return results;
+  }
+
   //get the minimum patient age
   Future<int> getMinAge(String editionId) async {
     //recuperer le DB
