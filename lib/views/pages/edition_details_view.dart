@@ -3,6 +3,7 @@ import 'package:rc_rtc_tolotanana/components/operation_chart.dart';
 import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/views/pages/add_patient_view.dart';
+import 'package:rc_rtc_tolotanana/views/pages/patient_list_view.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/custom_appbar.dart';
 
 import '../../services/database.dart';
@@ -52,84 +53,92 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
             Row(
               children: [
                 Expanded(
-                    child: SizedBox(
-                  height: MediaQuery.of(context).size.height / 3,
-                  child: Card(
-                    color: Colors.white,
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Nombre de patients',
-                            style: TextStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          FutureBuilder(
-                              future: DatabaseClient()
-                                  .getNumberOfPatients(widget.edition.id),
-                              builder: (context, snapshot) {
-                                if (snapshot.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const CircularProgressIndicator();
-                                } else if (snapshot.hasData) {
-                                  return Text(
-                                    snapshot.data.toString(),
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold),
+                    child: InkWell(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => PatientListView(
+                              edition: widget.edition,
+                            )));
+                  },
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height / 3,
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Nombre de patients',
+                              style: TextStyle(
+                                  fontSize: 24, fontWeight: FontWeight.bold),
+                            ),
+                            FutureBuilder(
+                                future: DatabaseClient()
+                                    .getNumberOfPatients(widget.edition.id),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasData) {
+                                    return Text(
+                                      snapshot.data.toString(),
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(
+                                          fontSize: 24,
+                                          fontWeight: FontWeight.bold),
+                                    );
+                                  } else {
+                                    return const CircularProgressIndicator();
+                                  }
+                                }),
+                            const Text('patients total'),
+                            FutureBuilder(
+                                future: DatabaseClient()
+                                    .getPatientPerSex(widget.edition.id),
+                                builder: (context, snapshot) {
+                                  return Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          const Text('Hommes'),
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting)
+                                            const CircularProgressIndicator()
+                                          else if (snapshot.hasData)
+                                            Text(getPerSexNumber(snapshot, 0)
+                                                .toString())
+                                          else
+                                            const CircularProgressIndicator()
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          const Text('Femmes'),
+                                          if (snapshot.connectionState ==
+                                              ConnectionState.waiting)
+                                            const CircularProgressIndicator()
+                                          else if (snapshot.hasData)
+                                            Text(getPerSexNumber(snapshot, 1)
+                                                .toString())
+                                          else
+                                            const CircularProgressIndicator()
+                                        ],
+                                      ),
+                                    ],
                                   );
-                                } else {
-                                  return const CircularProgressIndicator();
-                                }
-                              }),
-                          const Text('patients total'),
-                          FutureBuilder(
-                              future: DatabaseClient()
-                                  .getPatientPerSex(widget.edition.id),
-                              builder: (context, snapshot) {
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        const Text('Hommes'),
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting)
-                                          const CircularProgressIndicator()
-                                        else if (snapshot.hasData)
-                                          Text(getPerSexNumber(snapshot, 0)
-                                              .toString())
-                                        else
-                                          const CircularProgressIndicator()
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        const Text('Femmes'),
-                                        if (snapshot.connectionState ==
-                                            ConnectionState.waiting)
-                                          const CircularProgressIndicator()
-                                        else if (snapshot.hasData)
-                                          Text(getPerSexNumber(snapshot, 1)
-                                              .toString())
-                                        else
-                                          const CircularProgressIndicator()
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              }),
-                        ],
+                                }),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -356,6 +365,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
       AsyncSnapshot<List<Map<String, dynamic>>> snapshot, int sexValue) {
     int count = 0;
 
+    if (snapshot.data == null) return count;
     for (final map in snapshot.data!) {
       if (map['sex'] == sexValue) {
         count = map['COUNT(*)'];

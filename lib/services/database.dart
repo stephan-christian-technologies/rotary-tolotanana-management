@@ -156,7 +156,6 @@ class DatabaseClient {
 
     await _deleteAllEditions();
     await _deleteAllPatients();
-    await _deleteAllOperations();
     await _deleteAllPatientOperations();
 
     await syncEditionsToLocalStorage(editions);
@@ -244,11 +243,6 @@ class DatabaseClient {
   Future<void> _deleteAllPatients() async {
     Database db = await database;
     await db.delete("patient");
-  }
-
-  Future<void> _deleteAllOperations() async {
-    Database db = await database;
-    await db.delete("operation");
   }
 
   Future<void> _deleteAllPatientOperations() async {
@@ -491,6 +485,19 @@ class DatabaseClient {
     return results[0]['COUNT(*)'];
   }
 
+  //get patients by edition id
+  Future<List<Patient>> getPatientsByEditionId(String editionId) async {
+    //recuperer le DB
+    Database db = await database;
+    //faire une query ou demande
+    const query = 'SELECT * FROM patient WHERE edition = ?';
+    //recuperer les resultats
+    List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
+    //List<Map<String, dynamic>> results = await db.query("list");
+
+    return results.map((map) => Patient.fromMap(map)).toList();
+  }
+
   //get the minimum patient age
   Future<int> getMinAge(String editionId) async {
     //recuperer le DB
@@ -551,7 +558,7 @@ class DatabaseClient {
     Database db = await database;
     //faire une query ou demande
     const query =
-        'SELECT observation, COUNT(*) FROM patient GROUP BY observation WHERE edition = ?';
+        'SELECT observation, COUNT(*) FROM patient WHERE edition = ? GROUP BY observation';
     //recuperer les resultats
     List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     //List<Map<String, dynamic>> results = await db.query("list");
@@ -563,7 +570,7 @@ class DatabaseClient {
   Future<List<Map<String, dynamic>>> getPatientPerSex(String editionId) async {
     Database db = await database;
     const query =
-        "SELECT sex, COUNT(*) FROM patient GROUP BY sex WHERE edition = ?";
+        "SELECT sex, COUNT(*) FROM patient WHERE edition = ? GROUP BY sex";
     List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
     return results;
   }
