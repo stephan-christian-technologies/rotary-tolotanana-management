@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:rc_rtc_tolotanana/models/edition.dart';
@@ -7,19 +9,16 @@ import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
-patientsByEdtionToCsv(Edition edition, BuildContext context) async {
-  //get patients by edition id from database then convert to csv
-  List<Patient> patients =
-      await DatabaseClient().getPatientsByEditionId(edition.id);
-  //convert patients to csv
-  await savePatientsToCSV(patients, context, edition);
+Future<void> patientsByEditionToCsv(
+    Edition edition, BuildContext context) async {
+  final patients = await DatabaseClient().getPatientsByEditionId(edition.id);
+  await savePatientsToCsv(patients, context, edition);
 }
 
-Future<void> savePatientsToCSV(
+Future<void> savePatientsToCsv(
     List<Patient> patients, BuildContext context, Edition edition) async {
-  List<List<dynamic>> csvData = [];
+  final csvData = <List<dynamic>>[];
 
   // Add CSV header
   csvData.add([
@@ -28,8 +27,8 @@ Future<void> savePatientsToCSV(
     'firstname',
     'age',
     'sex',
-    'operation'
-        'anesthesiaType',
+    'operation',
+    'anesthesiaType',
     'telephone',
     'observation',
     'comment',
@@ -39,23 +38,18 @@ Future<void> savePatientsToCSV(
 
   int count = 0;
   // Add patient data
-  for (Patient patient in patients) {
+  for (final patient in patients) {
     count++;
 
     final operations =
         await DatabaseClient().getPatientOperationByPatientId(patient.id);
-    String operation = operations.toString();
-    if (operations.length > 1) {
-      //join operations with -
-      List<String> operationList = [];
-      for (var operation in operations) {
-        operationList.add(operation['name'].toString().split('.').last);
-      }
-      operation = operationList.join('-');
-    } else if (operations.length == 1) {
-      operation = operations[0]['name'].toString().split('.').last;
-    } else {
-      operation = '';
+    String operation = '';
+
+    if (operations.isNotEmpty) {
+      // Join operations with '-'
+      operation = operations
+          .map((op) => op['name'].toString().split('.').last)
+          .join('-');
     }
 
     csvData.add([
@@ -77,7 +71,7 @@ Future<void> savePatientsToCSV(
   }
 
   // Create a CSV string
-  String csvString = const ListToCsvConverter().convert(csvData);
+  final csvString = const ListToCsvConverter().convert(csvData);
   print(csvString);
 
   // Get the document directory
@@ -102,7 +96,7 @@ Future<void> savePatientsToCSV(
               Navigator.of(context).pop();
             },
           ),
-          // open the file
+          // Open the file
           TextButton(
             child: const Text('Ouvrir'),
             onPressed: () async {
@@ -110,7 +104,7 @@ Future<void> savePatientsToCSV(
               await OpenFilex.open(path);
             },
           ),
-          // share the file
+          // Share the file
           TextButton(
             child: const Text('Partager'),
             onPressed: () async {

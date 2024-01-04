@@ -39,7 +39,7 @@ class _PatientListViewState extends State<PatientListView> {
           IconButton(
             icon: const Icon(Icons.file_download),
             onPressed: () async {
-              await patientsByEdtionToCsv(widget.edition, context);
+              await patientsByEditionToCsv(widget.edition, context);
             },
           ),
         ],
