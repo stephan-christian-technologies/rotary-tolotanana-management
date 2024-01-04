@@ -81,6 +81,6 @@ enum OperationType {
   other
 }
 
-enum AnesthesiaType { local, general, other }
+enum AnesthesiaType { local, general, locogeneral, other }
 
 enum Observation { able, unable }
