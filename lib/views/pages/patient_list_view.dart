@@ -3,11 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
-import 'package:rc_rtc_tolotanana/models/patient_operation.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:rc_rtc_tolotanana/utils/csv_utils.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/add_textfield.dart';
-import 'package:sqflite/sqflite.dart';
 
 class PatientListView extends StatefulWidget {
   const PatientListView({
@@ -21,6 +19,20 @@ class PatientListView extends StatefulWidget {
 }
 
 class _PatientListViewState extends State<PatientListView> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,106 +63,143 @@ class _PatientListViewState extends State<PatientListView> {
         children: [
           //search bar
           Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: AddTextfield(
-                hint: 'Rechercher...', controller: TextEditingController()),
-          ),
+              padding: const EdgeInsets.all(8.0),
+              child: TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Rechercher un patient',
+                  border: const OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                  labelText: 'Rechercher un patient',
+                  suffixIcon: IconButton(
+                    icon: _searchController.text.isEmpty
+                        ? const Icon(Icons.search)
+                        : const Icon(Icons.clear),
+                    onPressed: () {
+                      _searchController.clear();
+                    },
+                  ),
+                ),
+                onChanged: (String query) {
+                  setState(() {});
+                },
+              )),
           Container(
-            margin: const EdgeInsets.only(top: 100),
-            child: FutureBuilder(
-                future:
-                    DatabaseClient().getPatientsByEditionId(widget.edition.id),
-                builder: (BuildContext context,
-                    AsyncSnapshot<List<Patient>> snapshot) {
-                  if (snapshot.hasError) {
-                    return const Center(
-                        child: Text('Erreur de chargement des données'));
-                  } else if (snapshot.hasData) {
-                    return ListView.separated(
-                      itemCount: snapshot.data!.length,
-                      separatorBuilder: (BuildContext context, int index) =>
-                          const Divider(),
-                      itemBuilder: (BuildContext context, int index) {
-                        Patient patient = snapshot.data![index];
-
-                        return ListTile(
-                          leading: Container(
-                              width: 50,
-                              height: 30,
-                              decoration: BoxDecoration(
-                                color: patient.observation == 1
-                                    ? Colors.green[200]
-                                    : Colors.red[200],
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  //circular shape for sex, blue for man, pink for female
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      color: patient.sex == 0
-                                          ? Colors.blue
-                                          : Colors.pink,
-                                      borderRadius: BorderRadius.circular(50),
-                                    ),
-                                  ),
-                                  Text(patient.folderId.toString()),
-                                ],
-                              )),
-                          title: Text(
-                              '${patient.lastname} ${patient.firstname ?? ''} - ${patient.age} ans'),
-                          subtitle: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FutureBuilder(
-                                future: getOperations(patient.id),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<String> snapshot) {
-                                  if (snapshot.hasError) {
-                                    return const Text(
-                                        'Erreur de chargement de la liste des opérations');
-                                  } else if (snapshot.hasData) {
-                                    return Text(snapshot.data!);
-                                  } else {
-                                    return const Text('Chargement...');
-                                  }
-                                },
-                              ),
-                              Row(
-                                children: [
-                                  const Icon(Icons.medication_liquid_outlined),
-                                  const SizedBox(width: 5),
-                                  Text(patient.anesthesiaType
-                                      .toString()
-                                      .split('.')
-                                      .last
-                                      .toUpperCase()),
-                                ],
-                              )
-                            ],
-                          ),
-                          trailing: IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () async {
-                              // await DatabaseClient().deletePatient(patient.id);
-                              setState(() {});
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  } else {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                }),
-          ),
+              margin: const EdgeInsets.only(top: 100),
+              child: patientListWidget()),
         ],
       ),
     );
+  }
+
+  FutureBuilder<List<Patient>> patientListWidget() {
+    final query = _searchController.text;
+    return FutureBuilder(
+        future: query.isNotEmpty
+            ? searchPatient(query)
+            : DatabaseClient().getPatientsByEditionId(widget.edition.id),
+        builder: (BuildContext context, AsyncSnapshot<List<Patient>> snapshot) {
+          if (snapshot.hasError) {
+            return const Center(
+                child: Text('Erreur de chargement des données'));
+          } else if (snapshot.hasData) {
+            return (snapshot.data!.isEmpty && query.isNotEmpty)
+                ? Center(child: Text('Aucun résultat trouvé pour "$query"'))
+                : ListView.separated(
+                    itemCount: snapshot.data!.length,
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(),
+                    itemBuilder: (BuildContext context, int index) {
+                      Patient patient = snapshot.data![index];
+
+                      return ListTile(
+                        leading: Text(formatFolderId(patient.folderId),
+                            style: TextStyle(
+                                fontSize: 20,
+                                color: patient.sex == 0
+                                    ? Colors.blue[800]
+                                    : Colors.pink[800])),
+                        title: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: patient.observation == 1
+                                    ? Colors.green[500]
+                                    : Colors.red[500],
+                                borderRadius: BorderRadius.circular(50),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.55,
+                              child: Text(
+                                '${patient.lastname} ${patient.firstname ?? ''} - ${patient.age} ans',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                softWrap: true,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FutureBuilder(
+                              future: getOperations(patient.id),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<String> snapshot) {
+                                if (snapshot.hasError) {
+                                  return const Text(
+                                      'Erreur de chargement de la liste des opérations');
+                                } else if (snapshot.hasData) {
+                                  return Row(
+                                    children: [
+                                      Text(snapshot.data!),
+                                      const SizedBox(width: 10),
+                                      Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey[300],
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            patient.anesthesiaType
+                                                .toString()
+                                                .split('.')
+                                                .last
+                                                .toUpperCase(),
+                                            style:
+                                                const TextStyle(fontSize: 10),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return const Text('Chargement...');
+                                }
+                              },
+                            ),
+                          ],
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            // await DatabaseClient().deletePatient(patient.id);
+                            setState(() {});
+                          },
+                        ),
+                      );
+                    },
+                  );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+        });
   }
 
   Future<String> getOperations(String id) async {
@@ -162,5 +211,31 @@ class _PatientListViewState extends State<PatientListView> {
     //remove the last ', '
     operations = operations.substring(0, operations.length - 2);
     return operations;
+  }
+
+  String formatFolderId(int folderId) {
+    String folderIdString = folderId.toString();
+    if (folderIdString.length == 1) {
+      folderIdString = '00$folderIdString';
+    } else if (folderIdString.length == 2) {
+      folderIdString = '0$folderIdString';
+    }
+    return folderIdString;
+  }
+
+  Future<List<Patient>> searchPatient(String query) async {
+    List<Patient> patients =
+        await DatabaseClient().getPatientsByEditionId(widget.edition.id);
+    List<Patient> results = [];
+    for (Patient patient in patients) {
+      final operations = await getOperations(patient.id);
+      if (patient.lastname.toLowerCase().contains(query.toLowerCase()) ||
+          patient.firstname!.toLowerCase().contains(query.toLowerCase()) ||
+          patient.folderId.toString().contains(query) ||
+          operations.contains(query)) {
+        results.add(patient);
+      }
+    }
+    return results;
   }
 }
