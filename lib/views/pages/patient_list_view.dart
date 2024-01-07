@@ -41,15 +41,6 @@ class _PatientListViewState extends State<PatientListView> {
           AppBar(
         title: const Text('Liste des patients'),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              // showSearch<String>(
-              //   context: context,
-              //   delegate: PatientSearchDelegate(),
-              // );
-            },
-          ),
           //export data to csv
           IconButton(
             icon: const Icon(Icons.file_download),
@@ -232,7 +223,13 @@ class _PatientListViewState extends State<PatientListView> {
       if (patient.lastname.toLowerCase().contains(query.toLowerCase()) ||
           patient.firstname!.toLowerCase().contains(query.toLowerCase()) ||
           patient.folderId.toString().contains(query) ||
-          operations.contains(query)) {
+          patient.anesthesiaType
+              .toString()
+              .split('.')
+              .last
+              .toLowerCase()
+              .contains(query.toLowerCase()) ||
+          operations.toLowerCase().contains(query)) {
         results.add(patient);
       }
     }
