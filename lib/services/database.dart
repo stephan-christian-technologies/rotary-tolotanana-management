@@ -42,6 +42,7 @@ class DatabaseClient {
     await database.execute('''
         CREATE TABLE patient (
           id TEXT PRIMARY KEY,
+          folderId INTEGER NOT NULL,
           lastName TEXT NOT NULL,
           firstName TEXT NOT NULL,
           age INTEGER NOT NULL,
@@ -190,6 +191,7 @@ class DatabaseClient {
         dataSnapshot.value as Map<dynamic, dynamic>;
     patientsMap.forEach((key, value) {
       final id = value['id'];
+      final folderId = value['folderId'];
       final firstname = value['firstname'];
       final lastname = value['lastname'];
       final address = value['address'];
@@ -204,6 +206,7 @@ class DatabaseClient {
 
       patients.add(Patient(
           id: id,
+          folderId: folderId,
           lastname: lastname,
           firstname: firstname,
           age: age,

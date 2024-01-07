@@ -11,13 +11,15 @@ import '../../services/database.dart';
 
 class AddPatientView extends StatefulWidget {
   final Edition edition;
-  const AddPatientView({super.key, required this.edition});
+
+  const AddPatientView({Key? key, required this.edition}) : super(key: key);
 
   @override
   State<AddPatientView> createState() => _AddPatientViewState();
 }
 
 class _AddPatientViewState extends State<AddPatientView> {
+  late TextEditingController folderIdController;
   late TextEditingController nameController;
   late TextEditingController firstNameController;
   late TextEditingController ageController;
@@ -32,6 +34,7 @@ class _AddPatientViewState extends State<AddPatientView> {
 
   @override
   void initState() {
+    folderIdController = TextEditingController();
     nameController = TextEditingController();
     firstNameController = TextEditingController();
     ageController = TextEditingController();
@@ -49,15 +52,16 @@ class _AddPatientViewState extends State<AddPatientView> {
 
   @override
   void dispose() {
+    folderIdController.dispose();
     nameController.dispose();
     firstNameController.dispose();
     ageController.dispose();
     sexeController = null;
     adresseController.dispose();
     telephoneController.dispose();
-    typeOperationController == null;
-    typeAnesthesieController == null;
-    observationController == null;
+    typeOperationController = null;
+    typeAnesthesieController = null;
+    observationController = null;
     commentaireController.dispose();
     dateNaissanceController.dispose();
 
@@ -68,9 +72,10 @@ class _AddPatientViewState extends State<AddPatientView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-          titleString: 'Ajout de patient',
-          buttonTitle: 'Valider',
-          callback: addPressed),
+        titleString: 'Ajout de patient',
+        buttonTitle: 'Valider',
+        callback: addPressed,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -81,46 +86,56 @@ class _AddPatientViewState extends State<AddPatientView> {
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 AddTextfield(
-                    hint: "Nom de famille", controller: nameController),
+                  hint: "Numéro de dossier",
+                  controller: folderIdController,
+                  textInputType: TextInputType.number,
+                ),
                 AddTextfield(
-                    hint: "Prénom(s)", controller: firstNameController),
+                  hint: "Nom de famille",
+                  controller: nameController,
+                ),
                 AddTextfield(
-                    hint: "Age",
-                    controller: ageController,
-                    textInputType: TextInputType.number),
-                //textfield with datepicker for birthdate
+                  hint: "Prénom(s)",
+                  controller: firstNameController,
+                ),
+                AddTextfield(
+                  hint: "Age",
+                  controller: ageController,
+                  textInputType: TextInputType.number,
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextField(
                     controller: dateNaissanceController,
                     decoration: const InputDecoration(
-                        hintText: 'Date de naissance',
-                        border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(8.0))),
-                        labelText: 'Date de naissance'),
+                      hintText: 'Date de naissance',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                      labelText: 'Date de naissance',
+                    ),
                     onTap: () async {
                       DateTime? date = DateTime(1900);
                       FocusScope.of(context).requestFocus(FocusNode());
 
                       date = await showDatePicker(
-                          context: context,
-                          initialDate: DateTime.now(),
-                          firstDate: DateTime(1900),
-                          lastDate: DateTime(2100));
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                      );
 
                       dateNaissanceController.text =
                           date?.toIso8601String().substring(0, 10) ?? '';
                     },
                   ),
                 ),
-                // AddTextfield(hint: "Sexe", controller: sexeController),
-                //radio buttons for sex
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 8.0),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8.0)),
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Column(
@@ -131,39 +146,42 @@ class _AddPatientViewState extends State<AddPatientView> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Radio(
-                                value: 0,
-                                groupValue: sexeController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    sexeController = value;
-                                  });
-                                }),
+                              value: 0,
+                              groupValue: sexeController,
+                              onChanged: (value) {
+                                setState(() {
+                                  sexeController = value;
+                                });
+                              },
+                            ),
                             const Text('Masculin'),
                             const Spacer(),
                             Radio(
-                                value: 1,
-                                groupValue: sexeController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    sexeController = value;
-                                  });
-                                }),
+                              value: 1,
+                              groupValue: sexeController,
+                              onChanged: (value) {
+                                setState(() {
+                                  sexeController = value;
+                                });
+                              },
+                            ),
                             const Text('Féminin'),
-                            const Spacer()
+                            const Spacer(),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                AddTextfield(hint: "Adresse", controller: adresseController),
+                AddTextfield(
+                  hint: "Adresse",
+                  controller: adresseController,
+                ),
                 AddTextfield(
                   hint: "Téléphone",
                   controller: telephoneController,
                   textInputType: TextInputType.phone,
                 ),
-
-                //checkbox for operations in database
                 FutureBuilder(
                   future: DatabaseClient().allOperations(),
                   builder: (context, AsyncSnapshot<List<Operation>> snapshot) {
@@ -172,8 +190,9 @@ class _AddPatientViewState extends State<AddPatientView> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0),
                         child: Container(
                           decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black),
-                              borderRadius: BorderRadius.circular(8.0)),
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -187,31 +206,31 @@ class _AddPatientViewState extends State<AddPatientView> {
                               Column(
                                 children: snapshot.data!.map((operation) {
                                   return CheckboxListTile.adaptive(
-                                      value: typeOperationController!
-                                              .contains(operation.name)
-                                          ? true
-                                          : false,
-                                      title: Text(operation.name.split('.')[1]),
-                                      onChanged: (value) {
-                                        setState(() {
-                                          if (value == true) {
-                                            typeOperationController =
-                                                typeOperationController!
-                                                    .toSet()
-                                                    .union({
-                                              operation.name
-                                            }).toList();
-                                          } else {
-                                            //remove operation from list
-                                            typeOperationController =
-                                                typeOperationController!
-                                                    .toSet()
-                                                    .difference({
-                                              operation.name
-                                            }).toList();
-                                          }
-                                        });
+                                    value: typeOperationController!
+                                            .contains(operation.name)
+                                        ? true
+                                        : false,
+                                    title: Text(operation.name.split('.')[1]),
+                                    onChanged: (value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          typeOperationController =
+                                              typeOperationController!
+                                                  .toSet()
+                                                  .union({
+                                            operation.name
+                                          }).toList();
+                                        } else {
+                                          typeOperationController =
+                                              typeOperationController!
+                                                  .toSet()
+                                                  .difference({
+                                            operation.name
+                                          }).toList();
+                                        }
                                       });
+                                    },
+                                  );
                                 }).toList(),
                               ),
                             ],
@@ -225,7 +244,6 @@ class _AddPatientViewState extends State<AddPatientView> {
                     }
                   },
                 ),
-
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Row(
@@ -254,22 +272,21 @@ class _AddPatientViewState extends State<AddPatientView> {
                           return DropdownMenuItem<AnesthesiaType>(
                             value: value,
                             child: Text(
-                                value.toString().split('.')[1].toUpperCase(),
-                                style: const TextStyle(color: Colors.black)),
+                              value.toString().split('.')[1].toUpperCase(),
+                              style: const TextStyle(color: Colors.black),
+                            ),
                           );
                         }).toList(),
                       ),
                     ],
                   ),
                 ),
-                // AddTextfield(
-                //     hint: "Observation", controller: observationController),
-                //radio buttons for observation
                 Container(
                   margin: const EdgeInsets.symmetric(vertical: 16.0),
                   decoration: BoxDecoration(
-                      border: Border.all(color: Colors.black),
-                      borderRadius: BorderRadius.circular(8.0)),
+                    border: Border.all(color: Colors.black),
+                    borderRadius: BorderRadius.circular(8.0),
+                  ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -280,60 +297,59 @@ class _AddPatientViewState extends State<AddPatientView> {
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: [
                             Radio(
-                                value: 1,
-                                groupValue: observationController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    observationController = value;
-                                  });
-                                }),
+                              value: 1,
+                              groupValue: observationController,
+                              onChanged: (value) {
+                                setState(() {
+                                  observationController = value;
+                                });
+                              },
+                            ),
                             const Text('Apte'),
                             const Spacer(),
                             Radio(
-                                value: 0,
-                                groupValue: observationController,
-                                onChanged: (value) {
-                                  setState(() {
-                                    observationController = value;
-                                  });
-                                }),
+                              value: 0,
+                              groupValue: observationController,
+                              onChanged: (value) {
+                                setState(() {
+                                  observationController = value;
+                                });
+                              },
+                            ),
                             const Text('inapte'),
-                            const Spacer()
+                            const Spacer(),
                           ],
                         ),
                       ],
                     ),
                   ),
                 ),
-                // AddTextfield(
-                //     hint: "Commentaire", controller: commentaireController),
-                // long text field for comment
                 TextField(
                   controller: commentaireController,
                   decoration: const InputDecoration(
-                      hintText: 'Commentaire',
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(8.0))),
-                      labelText: 'Commentaire'),
+                    hintText: 'Commentaire',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                    labelText: 'Commentaire',
+                  ),
                   maxLines: 5,
                 ),
-                // AddTextfield(
-                //     hint: "Date de naissance",
-                //     controller: dateNaissanceController),
               ],
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  //Ajout d'un patient
   addPressed() async {
     FocusScope.of(context).requestFocus(FocusNode());
-    // si nom est vide, ne rien faire
+
     if (nameController.text.isEmpty) return;
+
     Map<String, dynamic> map = {'edition': widget.edition.id};
+    map['folderId'] = int.parse(folderIdController.text);
     map['lastName'] = nameController.text;
     map['firstName'] = firstNameController.text;
     map['age'] = int.parse(ageController.text);
@@ -346,35 +362,30 @@ class _AddPatientViewState extends State<AddPatientView> {
     map['commentaire'] = commentaireController.text;
     map['birthDate'] = dateNaissanceController.text;
 
-    // map['name'] = nameController.text;
-    // if (shopController.text.isNotEmpty) map['shop'] = shopController.text;
-    // double price = double.tryParse(priceController.text) ?? 0.0;
-    // map['price'] = price;
-    // if (imagePath != null) map['image'] = imagePath;
     const uuid = Uuid();
     map['id'] = uuid.v4();
     Patient patient = Patient.fromMap(map);
-    // DatabaseClient().upsert(patient).then((value) => Navigator.pop(context));
-    //upsert patient then get its id
+
     await DatabaseClient().insert(patient);
-    //get patient id
-    // final patientId = await DatabaseClient().getPatientId(patient.lastname);
+
     final patientId = patient.id;
 
     for (var operation in typeOperationController!) {
-      //get operation id according to its name
       final operationId = await DatabaseClient().getOperationId(operation);
-      //add patient_operation
       await DatabaseClient().addPatientOperation(null, patientId, operationId);
     }
-    //show snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${patient.lastname} ajouté avec succès')));
 
-    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-      return EditionDetailsView(
-        edition: widget.edition,
-      );
-    }));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('${patient.lastname} ajouté avec succès')),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditionDetailsView(
+          edition: widget.edition,
+        ),
+      ),
+    );
   }
 }

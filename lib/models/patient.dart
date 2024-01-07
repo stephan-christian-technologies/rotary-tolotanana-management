@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 
 class Patient {
   String id;
+  int folderId;
   String lastname;
   String? firstname;
   int age;
@@ -16,6 +17,7 @@ class Patient {
 
   Patient(
       {required this.id,
+      required this.folderId,
       required this.lastname,
       this.firstname,
       required this.age,
@@ -30,6 +32,7 @@ class Patient {
 
   Map<String, dynamic> toMap() {
     var map = <String, dynamic>{
+      'folderId': folderId,
       'lastname': lastname,
       'firstname': firstname,
       'age': age,
@@ -51,6 +54,7 @@ class Patient {
   factory Patient.fromMap(Map<String, dynamic> data) {
     return Patient(
       id: data['id'] ?? const Uuid().v4(),
+      folderId: data['folderId'],
       lastname: data['lastName'],
       firstname: data['firstName'],
       age: data['age'],
