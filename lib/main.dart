@@ -16,8 +16,23 @@ Future<void> main() async {
   );
 
   final ios = defaultTargetPlatform == TargetPlatform.iOS;
-  var app_secret = ios ? '' : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
-  await AppCenter.start(secret: app_secret);
+  var appSecret = ios ? '' : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
+  await AppCenter.start(secret: appSecret);
+  FlutterError.onError = (final details) async {
+    await AppCenterCrashes.trackException(
+      message: details.exception.toString(),
+      type: details.exception.runtimeType,
+      stackTrace: details.stack,
+    );
+  };
+  PlatformDispatcher.instance.onError = (error, stack) {
+    AppCenterCrashes.trackException(
+      message: error.toString(),
+      type: error.runtimeType,
+      stackTrace: stack,
+    );
+    return true;
+  };
 
   DatabaseClient databaseClient = DatabaseClient();
 
