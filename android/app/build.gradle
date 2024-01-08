@@ -64,4 +64,10 @@ flutter {
     source '../..'
 }
 
-dependencies {}
+dependencies {
+    def appCenterSdkVersion = '4.4.5'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}"
+    implementation "com.microsoft.appcenter:appcenter-distribute:${appCenterSdkVersion}"
+}
