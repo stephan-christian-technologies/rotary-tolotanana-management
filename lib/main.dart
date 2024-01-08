@@ -16,7 +16,9 @@ Future<void> main() async {
   );
 
   final ios = defaultTargetPlatform == TargetPlatform.iOS;
-  var appSecret = ios ? '' : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
+  var appSecret = ios
+      ? '2188eb3f-c4e4-43f5-ba29-de9e84aa52e8'
+      : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
   await AppCenter.start(secret: appSecret);
   FlutterError.onError = (final details) async {
     await AppCenterCrashes.trackException(
