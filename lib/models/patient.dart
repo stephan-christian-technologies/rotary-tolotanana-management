@@ -14,6 +14,7 @@ class Patient {
   String? address;
   DateTime? birthDate;
   String edition;
+  int? status;
 
   Patient(
       {required this.id,
@@ -28,6 +29,7 @@ class Patient {
       this.comment,
       this.address,
       this.birthDate,
+      this.status,
       required this.edition});
 
   Map<String, dynamic> toMap() {
@@ -44,6 +46,7 @@ class Patient {
       'address': address,
       'birthDate': birthDate?.toIso8601String(),
       'edition': edition,
+      'status': status,
     };
     if (id != null) {
       map['id'] = id;
@@ -66,6 +69,7 @@ class Patient {
       address: data['address'],
       birthDate: DateTime.parse(data['birthDate']),
       edition: data['edition'],
+      status: data['status'],
     );
   }
 }

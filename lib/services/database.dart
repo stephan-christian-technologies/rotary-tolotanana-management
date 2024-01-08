@@ -54,6 +54,7 @@ class DatabaseClient {
           address TEXT,
           birthDate TEXT NOT NULL,
           edition INTEGER,
+          status INTEGER,
           FOREIGN KEY(edition) REFERENCES edition(id)
         )
       ''');
