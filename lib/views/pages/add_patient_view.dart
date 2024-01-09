@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/material.dart';
 import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/operation.dart';
@@ -126,7 +128,7 @@ class _AddPatientViewState extends State<AddPatientView> {
                       );
 
                       dateNaissanceController.text =
-                          date?.toIso8601String().substring(0, 10) ?? '';
+                          date?.toIso8601String() ?? '';
                     },
                   ),
                 ),
@@ -350,8 +352,8 @@ class _AddPatientViewState extends State<AddPatientView> {
 
     Map<String, dynamic> map = {'edition': widget.edition.id};
     map['folderId'] = int.parse(folderIdController.text);
-    map['lastName'] = nameController.text;
-    map['firstName'] = firstNameController.text;
+    map['lastname'] = nameController.text;
+    map['firstname'] = firstNameController.text;
     map['age'] = int.parse(ageController.text);
     map['sex'] = sexeController;
     map['address'] = adresseController.text;
@@ -359,20 +361,32 @@ class _AddPatientViewState extends State<AddPatientView> {
     map['operationType'] = typeOperationController;
     map['anesthesiaType'] = typeAnesthesieController.toString();
     map['observation'] = observationController;
-    map['commentaire'] = commentaireController.text;
+    map['comment'] = commentaireController.text;
     map['birthDate'] = dateNaissanceController.text;
+    map['status'] = 0;
 
     const uuid = Uuid();
     map['id'] = uuid.v4();
     Patient patient = Patient.fromMap(map);
+    try {
+      await DatabaseClient().insert(patient);
 
-    await DatabaseClient().insert(patient);
+      final patientId = patient.id;
 
-    final patientId = patient.id;
-
-    for (var operation in typeOperationController!) {
-      final operationId = await DatabaseClient().getOperationId(operation);
-      await DatabaseClient().addPatientOperation(null, patientId, operationId);
+      for (var operation in typeOperationController!) {
+        final operationId = await DatabaseClient().getOperationId(operation);
+        await DatabaseClient()
+            .addPatientOperation(null, patientId, operationId);
+      }
+    } catch (e) {
+      // ignore: use_build_context_synchronously
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: const Text('Erreur'),
+                content: Text(
+                    'Une erreur est survenue lors de l\'ajout du patient: $e'),
+              ));
     }
 
     ScaffoldMessenger.of(context).showSnackBar(

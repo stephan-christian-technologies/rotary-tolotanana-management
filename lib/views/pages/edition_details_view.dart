@@ -4,6 +4,7 @@ import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/views/pages/add_patient_view.dart';
 import 'package:rc_rtc_tolotanana/views/pages/patient_list_view.dart';
+import 'package:rc_rtc_tolotanana/views/pages/program_view.dart';
 import 'package:rc_rtc_tolotanana/views/widgets/custom_appbar.dart';
 
 import '../../services/database.dart';
@@ -215,12 +216,38 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                                   ),
                                 ),
                               ),
-                            ),
+                            )
                           ],
                         );
                       }),
                 )
               ],
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => ProgramPage(
+                          edition: widget.edition,
+                        )));
+              },
+              child: const Card(
+                elevation: 2,
+                child: SizedBox(
+                  height: 100,
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.calendar_month_outlined, size: 50),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        Text('Programme', style: TextStyle(fontSize: 20)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(
               height: 20,

@@ -1,25 +1,25 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:rc_rtc_tolotanana/models/edition.dart';
+
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:rc_rtc_tolotanana/utils/csv_utils.dart';
 import 'package:rc_rtc_tolotanana/utils/utils.dart';
 import 'package:rc_rtc_tolotanana/views/pages/patient_details_view.dart';
+import 'package:sqflite/sqflite.dart';
 
-class PatientListView extends StatefulWidget {
-  const PatientListView({
+class ProgramDayView extends StatefulWidget {
+  const ProgramDayView({
     Key? key,
-    required this.edition,
+    required this.day,
   }) : super(key: key);
-
-  final Edition edition;
-
+  final int day;
   @override
-  State<PatientListView> createState() => _PatientListViewState();
+  State<ProgramDayView> createState() => _ProgramDayViewState();
 }
 
-class _PatientListViewState extends State<PatientListView> {
+class _ProgramDayViewState extends State<ProgramDayView> {
   late TextEditingController _searchController;
   bool _isSelecting = false;
   bool _allSelected = false;
@@ -42,16 +42,18 @@ class _PatientListViewState extends State<PatientListView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: Text(_isSelecting
             ? '${_selectedIds.length} séléctionné(s)'
-            : 'Liste des patients'),
+            : '${getStatusDetails(widget.day)['day']} : ${_patients.length} patients'),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.file_download),
-            onPressed: () async {
-              await patientsByEditionToCsv(widget.edition, context);
-            },
-          ),
+          if (!_isSelecting)
+            IconButton(
+              icon: const Icon(Icons.file_download),
+              onPressed: () async {
+                // await patientsByEditionToCsv(widget.edition, context);
+              },
+            ),
           if (_isSelecting)
             TextButton(
               onPressed: () {
@@ -83,6 +85,54 @@ class _PatientListViewState extends State<PatientListView> {
                 style: TextStyle(color: Colors.black),
               ),
             ),
+          if (_isSelecting)
+            IconButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text("Actions"),
+                          content: Column(children: [
+                            TextButton(
+                                onPressed: () {
+                                  for (String id in _selectedIds) {
+                                    DatabaseClient().deletePatient(id);
+                                  }
+                                  setState(() {});
+                                  Navigator.of(context).pop();
+                                },
+                                child: const Text('Supprimer')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 1);
+                                },
+                                child: const Text('Lundi')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 2);
+                                },
+                                child: const Text('Mardi')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 3);
+                                },
+                                child: const Text('Mercredi')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 4);
+                                },
+                                child: const Text('Jeudi')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 5);
+                                },
+                                child: const Text('Vendredi')),
+                          ]),
+                        );
+                      });
+                },
+                icon: const Icon(Icons.more_vert))
         ],
       ),
       body: Stack(
@@ -120,12 +170,28 @@ class _PatientListViewState extends State<PatientListView> {
     );
   }
 
+  Future<void> groupUpdateStatus(BuildContext context, int status) async {
+    for (String id in _selectedIds) {
+      final p = await DatabaseClient().getPatient(id);
+      final map = p.toMap();
+      map['status'] = status;
+      await DatabaseClient().updatePatient(Patient.fromMap(map));
+    }
+    setState(() {
+      _isSelecting = false;
+      _selectedIds = [];
+    });
+    // ignore: use_build_context_synchronously
+    Navigator.of(context).pop();
+  }
+
   FutureBuilder<List<Patient>> patientListWidget() {
     final query = _searchController.text;
+    setState(() {});
     return FutureBuilder<List<Patient>>(
       future: query.isNotEmpty
           ? searchPatient(query)
-          : DatabaseClient().getPatientsByEditionId(widget.edition.id),
+          : DatabaseClient().getPatientByStatus(widget.day),
       builder: (BuildContext context, AsyncSnapshot<List<Patient>> snapshot) {
         if (snapshot.hasError) {
           return const Center(child: Text('Erreur de chargement des données'));
@@ -149,50 +215,61 @@ class _PatientListViewState extends State<PatientListView> {
                         children: [
                           SlidableAction(
                             onPressed: (context) {
-                              updateStatus(context, 1, patient);
+                              updateStatus(1, patient);
                             },
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             label: 'Lun',
                           ),
-                          const SlidableAction(
-                            onPressed: null,
+                          SlidableAction(
+                            onPressed: (context) {
+                              updateStatus(2, patient);
+                            },
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
                             label: 'Mar',
                           ),
-                          const SlidableAction(
-                            onPressed: null,
+                          SlidableAction(
+                            onPressed: (context) {
+                              updateStatus(1, patient);
+                            },
                             backgroundColor: Colors.yellow,
                             foregroundColor: Colors.white,
                             label: 'Mer',
                           ),
-                          const SlidableAction(
-                              onPressed: null,
+                          SlidableAction(
+                              onPressed: (context) {
+                                updateStatus(1, patient);
+                              },
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
                               label: 'Jeu'),
-                          const SlidableAction(
-                            onPressed: null,
+                          SlidableAction(
+                            onPressed: (context) {
+                              updateStatus(1, patient);
+                            },
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                             label: 'Ven',
                           )
                         ],
                       ),
-                      endActionPane: ActionPane(
-                        motion: const ScrollMotion(),
+                      endActionPane: const ActionPane(
+                        motion: ScrollMotion(),
                         children: [
                           SlidableAction(
-                            onPressed: (BuildContext context) async {
-                              await DatabaseClient()
-                                  .deletePatient(patient.id)
-                                  .then((value) => setState(() {}));
-                            },
-                            backgroundColor: const Color(0xFFFE4A49),
+                            onPressed: null,
+                            backgroundColor: Color(0xFFFE4A49),
                             foregroundColor: Colors.white,
                             icon: Icons.delete,
                             label: 'Delete',
+                          ),
+                          SlidableAction(
+                            onPressed: null,
+                            backgroundColor: Color(0xFF21B7CA),
+                            foregroundColor: Colors.white,
+                            icon: Icons.share,
+                            label: 'Share',
                           ),
                         ],
                       ),
@@ -361,7 +438,7 @@ class _PatientListViewState extends State<PatientListView> {
 
   Future<List<Patient>> searchPatient(String query) async {
     List<Patient> patients =
-        await DatabaseClient().getPatientsByEditionId(widget.edition.id);
+        await DatabaseClient().getPatientByStatus(widget.day);
     List<Patient> results = [];
     for (Patient patient in patients) {
       final operations = await getOperations(patient.id);
@@ -384,7 +461,7 @@ class _PatientListViewState extends State<PatientListView> {
     return results;
   }
 
-  updateStatus(BuildContext context, int status, Patient patient) {
+  updateStatus(int status, Patient patient) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -402,8 +479,30 @@ class _PatientListViewState extends State<PatientListView> {
               onPressed: () async {
                 var patientMap = patient.toMap();
                 patientMap['status'] = status;
-                await DatabaseClient()
-                    .updatePatient(Patient.fromMap(patientMap));
+                try {
+                  await DatabaseClient()
+                      .updatePatient(Patient.fromMap(patientMap));
+                } catch (e) {
+                  // ignore: use_build_context_synchronously
+                  showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Erreur'),
+                          content: Text(e.toString()),
+                          actions: <Widget>[
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: const Text('OK'),
+                            ),
+                          ],
+                        );
+                      });
+                }
+                setState(() {});
+                // ignore: use_build_context_synchronously
                 Navigator.of(context).pop();
               },
               child: const Text('Confirmer'),

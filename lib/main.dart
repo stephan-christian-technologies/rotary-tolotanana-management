@@ -15,26 +15,30 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  final ios = defaultTargetPlatform == TargetPlatform.iOS;
-  var appSecret = ios
-      ? '2188eb3f-c4e4-43f5-ba29-de9e84aa52e8'
-      : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
-  await AppCenter.start(secret: appSecret);
-  FlutterError.onError = (final details) async {
-    await AppCenterCrashes.trackException(
-      message: details.exception.toString(),
-      type: details.exception.runtimeType,
-      stackTrace: details.stack,
-    );
-  };
-  PlatformDispatcher.instance.onError = (error, stack) {
-    AppCenterCrashes.trackException(
-      message: error.toString(),
-      type: error.runtimeType,
-      stackTrace: stack,
-    );
-    return true;
-  };
+  // try {
+  //   final ios = defaultTargetPlatform == TargetPlatform.iOS;
+  //   var appSecret = ios
+  //       ? "67026959-a58f-4cc8-86f6-9ed6b6909815"
+  //       : "2188eb3f-c4e4-43f5-ba29-de9e84aa52e8";
+  //   await AppCenter.start(secret: appSecret);
+  //   FlutterError.onError = (final details) async {
+  //     await AppCenterCrashes.trackException(
+  //       message: details.exception.toString(),
+  //       type: details.exception.runtimeType,
+  //       stackTrace: details.stack,
+  //     );
+  //   };
+  //   PlatformDispatcher.instance.onError = (error, stack) {
+  //     AppCenterCrashes.trackException(
+  //       message: error.toString(),
+  //       type: error.runtimeType,
+  //       stackTrace: stack,
+  //     );
+  //     return true;
+  //   };
+  // } on Exception catch (e) {
+  //   print(e.toString());
+  // }
 
   DatabaseClient databaseClient = DatabaseClient();
 
