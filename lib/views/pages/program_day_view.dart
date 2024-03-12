@@ -41,6 +41,12 @@ class _ProgramDayViewState extends State<ProgramDayView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          setState(() {});
+        },
+        child: const Icon(Icons.refresh),
+      ),
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Text(_isSelecting
@@ -197,7 +203,7 @@ class _ProgramDayViewState extends State<ProgramDayView> {
           return const Center(child: Text('Erreur de chargement des données'));
         } else if (snapshot.hasData) {
           final patients = snapshot.data!;
-          _patients = patients;
+          updatePatientList(patients);
           return (patients.isEmpty && query.isNotEmpty)
               ? Center(child: Text('Aucun résultat trouvé pour "$query"'))
               : ListView.separated(
@@ -219,7 +225,7 @@ class _ProgramDayViewState extends State<ProgramDayView> {
                             },
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
-                            label: 'Lun',
+                            label: '1',
                           ),
                           SlidableAction(
                             onPressed: (context) {
@@ -227,50 +233,31 @@ class _ProgramDayViewState extends State<ProgramDayView> {
                             },
                             backgroundColor: Colors.orange,
                             foregroundColor: Colors.white,
-                            label: 'Mar',
+                            label: '2',
                           ),
                           SlidableAction(
                             onPressed: (context) {
-                              updateStatus(1, patient);
+                              updateStatus(3, patient);
                             },
                             backgroundColor: Colors.yellow,
                             foregroundColor: Colors.white,
-                            label: 'Mer',
+                            label: '3',
                           ),
                           SlidableAction(
                               onPressed: (context) {
-                                updateStatus(1, patient);
+                                updateStatus(4, patient);
                               },
                               backgroundColor: Colors.green,
                               foregroundColor: Colors.white,
-                              label: 'Jeu'),
+                              label: '4'),
                           SlidableAction(
                             onPressed: (context) {
-                              updateStatus(1, patient);
+                              updateStatus(5, patient);
                             },
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
-                            label: 'Ven',
+                            label: '5',
                           )
-                        ],
-                      ),
-                      endActionPane: const ActionPane(
-                        motion: ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Color(0xFFFE4A49),
-                            foregroundColor: Colors.white,
-                            icon: Icons.delete,
-                            label: 'Delete',
-                          ),
-                          SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Color(0xFF21B7CA),
-                            foregroundColor: Colors.white,
-                            icon: Icons.share,
-                            label: 'Share',
-                          ),
                         ],
                       ),
                       child: GestureDetector(
@@ -421,6 +408,10 @@ class _ProgramDayViewState extends State<ProgramDayView> {
         }
       },
     );
+  }
+
+  void updatePatientList(List<Patient> patients) {
+    _patients = patients;
   }
 
   Future<String> getOperations(String id) async {

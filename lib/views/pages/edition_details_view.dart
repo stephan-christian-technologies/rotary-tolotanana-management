@@ -32,7 +32,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
     return Scaffold(
         appBar: CustomAppBar(
             titleString: 'Statistiques',
-            buttonTitle: '+',
+            buttonTitle: 'Ajouter',
             callback: addNewItem),
         body: SingleChildScrollView(
             child: Padding(
@@ -83,9 +83,10 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                                 builder: (context, snapshot) {
                                   if (snapshot.connectionState ==
                                       ConnectionState.waiting) {
-                                    return const CircularProgressIndicator();
+                                    return const SizedBox(height: 15, width: 15, child: CircularProgressIndicator());
                                   } else if (snapshot.hasData) {
-                                    return Text(
+                                    return 
+                                    Text(
                                       snapshot.data.toString(),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
@@ -114,8 +115,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                                               ConnectionState.waiting)
                                             const CircularProgressIndicator()
                                           else if (snapshot.hasData)
-                                            Text(getPerSexNumber(snapshot, 0)
-                                                .toString())
+                                            Text(' ${getPerSexNumber(snapshot, 0)}')
                                           else
                                             const CircularProgressIndicator()
                                         ],
@@ -129,8 +129,7 @@ class _EditionDetailsViewState extends State<EditionDetailsView> {
                                               ConnectionState.waiting)
                                             const CircularProgressIndicator()
                                           else if (snapshot.hasData)
-                                            Text(getPerSexNumber(snapshot, 1)
-                                                .toString())
+                                            Text(' ${getPerSexNumber(snapshot, 1)}')
                                           else
                                             const CircularProgressIndicator()
                                         ],

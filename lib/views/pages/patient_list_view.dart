@@ -144,42 +144,6 @@ class _PatientListViewState extends State<PatientListView> {
                       key: Key(patient.id),
                       direction: Axis.horizontal,
                       useTextDirection: false,
-                      startActionPane: ActionPane(
-                        motion: const ScrollMotion(),
-                        children: [
-                          SlidableAction(
-                            onPressed: (context) {
-                              updateStatus(context, 1, patient);
-                            },
-                            backgroundColor: Colors.red,
-                            foregroundColor: Colors.white,
-                            label: 'Lun',
-                          ),
-                          const SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            label: 'Mar',
-                          ),
-                          const SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Colors.yellow,
-                            foregroundColor: Colors.white,
-                            label: 'Mer',
-                          ),
-                          const SlidableAction(
-                              onPressed: null,
-                              backgroundColor: Colors.green,
-                              foregroundColor: Colors.white,
-                              label: 'Jeu'),
-                          const SlidableAction(
-                            onPressed: null,
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            label: 'Ven',
-                          )
-                        ],
-                      ),
                       endActionPane: ActionPane(
                         motion: const ScrollMotion(),
                         children: [
