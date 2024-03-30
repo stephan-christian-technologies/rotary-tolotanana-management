@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
+import 'package:rc_rtc_tolotanana/utils/utils.dart';
 
 class PatientDetailsPage extends StatefulWidget {
-  const PatientDetailsPage({super.key, required this.patient});
+  const PatientDetailsPage({Key? key, required this.patient}) : super(key: key);
   final Patient patient;
 
   @override
@@ -21,105 +22,130 @@ class _PatientDetailsPageState extends State<PatientDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Détails du patient'),
-        ),
-        body: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      const SizedBox(width: 20),
-                      Container(
-                          width: 70,
-                          height: 70,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: patient.sex == 0 ? Colors.blue : Colors.pink,
-                          ),
-                          child: const Icon(Icons.person,
-                              color: Colors.white, size: 70)),
-                      const SizedBox(width: 30),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                                '${patient.lastname} ${patient.firstname ?? ''}',
-                                style: const TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold)),
-                            Text(
-                                'N° ${patient.folderId}    -    ${patient.age} ans')
-                          ],
-                        ),
-                      )
-                    ]),
-                const SizedBox(height: 10),
-                Text(patient.observation.toString() == '1' ? 'Apte' : 'Inapte',
-                    style: const TextStyle(fontSize: 20)),
-                Card(
-                  child: SizedBox(
-                      height: 100,
-                      child: Center(
-                          child: Text(
-                              (patient.status.toString() != 'null' &&
-                                      patient.observation.toString() == '1')
-                                  ? patient.status.toString()
-                                  : (patient.status.toString() == 'null' &&
-                                          patient.observation.toString() == '1')
-                                      ? 'Pas encore programmé'
-                                      : 'Pas programmé pour cette mission',
-                              style: const TextStyle(fontSize: 20)))),
+      appBar: AppBar(
+        title: const Text('Détails du patient'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              const SizedBox(height: 20),
+              Center(
+                child: CircleAvatar(
+                  radius: 40,
+                  backgroundColor: patient.sex == 0 ? Colors.blue : Colors.pink,
+                  child: const Icon(
+                    Icons.person,
+                    color: Colors.white,
+                    size: 40,
+                  ),
                 ),
-                Text('Diagnostic', style: const TextStyle(fontSize: 20)),
-                Text('Anesthésie', style: const TextStyle(fontSize: 20)),
-                Card(
-                  child: SizedBox(
-                      height: 100,
-                      child: Center(
-                          child: Text(
-                              patient.anesthesiaType
-                                  .split('.')
-                                  .last
-                                  .toUpperCase(),
-                              style: const TextStyle(fontSize: 20)))),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  '${patient.lastname} ${patient.firstname ?? ''}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.calendar_today),
-                    const SizedBox(width: 10),
-                    Text(patient.birthDate?.toIso8601String() ?? '')
-                  ],
+              ),
+              const SizedBox(height: 10),
+              Center(
+                child: Text(
+                  'N° ${patient.folderId} - ${patient.age} ans',
+                  style: const TextStyle(fontSize: 18),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.medical_services),
-                    const SizedBox(width: 10),
-                    Text(patient.observation.toString())
-                  ],
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Text(
+                  patient.observation.toString() == '1' ? 'Apte' : 'Inapte',
+                  style: const TextStyle(fontSize: 24),
                 ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.medical_services),
-                    const SizedBox(width: 10),
-                    Text(patient.comment ?? '')
-                  ],
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 100),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_month),
+                  const SizedBox(width: 10),
+                  const Text("Jour d'intervention: ", style: TextStyle(fontSize: 18)),
+                  const Spacer(),
+                  Text(
+                    (patient.status.toString() != 'null' &&
+                            patient.observation.toString() == '1')
+                        ? getStatusDetails(patient.status)['day']
+                        : (patient.status.toString() == 'null' &&
+                                patient.observation.toString() == '1')
+                            ? 'Pas encore programmé'
+                            : 'Pas programmé pour cette mission',
+                    style: const TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Row(
+                children: [
+                  Icon(Icons.info),
+                  SizedBox(width: 10),  
+                  Text(
+                    'Diagnostic: ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  Spacer(),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.local_hospital),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'Anesthésie: ',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const Spacer(),
+                  Text(
+                    patient.anesthesiaType
+                        .split('.')
+                        .last
+                        .toUpperCase(),
+                    style: const TextStyle(fontSize: 18),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.calendar_today),
+                  const SizedBox(width: 10),
+                  const Text('Date de naissance: ', style: TextStyle(fontSize: 18)),
+                  const Spacer(),
+                  Text(DateTime.parse(patient.birthDate.toString())
+                      .toLocal()
+                      .toString()
+                      .split(' ')[0]),
+                ],
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  const Icon(Icons.message),
+                  const SizedBox(width: 10),
+                  const Text('Commentaire: ', style: TextStyle(fontSize: 18)),
+                  const Spacer(),
+                  Text(patient.comment ?? ''),
+                ],
+              ),
+            ],
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

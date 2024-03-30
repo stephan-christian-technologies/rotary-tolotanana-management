@@ -22,7 +22,7 @@ class _ProgramPageState extends State<ProgramPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 6, vsync: this);
+    _tabController = TabController(length: 7, vsync: this);
   }
 
   @override
@@ -45,6 +45,7 @@ class _ProgramPageState extends State<ProgramPage>
               Tab(text: 'Mer'),
               Tab(text: 'Jeu'),
               Tab(text: 'Ven'),
+              Tab(text: 'Standby')
             ],
           )),
       body: TabBarView(
@@ -56,6 +57,7 @@ class _ProgramPageState extends State<ProgramPage>
           ProgramDayView(day: 3),
           ProgramDayView(day: 4),
           ProgramDayView(day: 5),
+          ProgramDayView(day: 6),
         ],
       ),
     );

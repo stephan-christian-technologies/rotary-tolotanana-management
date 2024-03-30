@@ -27,6 +27,11 @@ Map<String, dynamic> getStatusDetails(int? id) {
         'day': 'VENDREDI',
         'color': Colors.blue[700],
       };
+    case 6:
+      return {
+        'day': 'STANDBY',
+        'color': Colors.purple[700],
+      };
     case null:
       return {
         'day': 'Non programmé',
