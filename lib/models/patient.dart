@@ -18,6 +18,8 @@ class Patient {
   DateTime? birthDate;
   String edition;
   int? status;
+  String? weight;
+  String? bloodPressure;
 
   Patient(
       {required this.id,
@@ -33,6 +35,8 @@ class Patient {
       this.address,
       this.birthDate,
       this.status,
+      this.weight,
+      this.bloodPressure,
       required this.edition});
 
   Map<String, dynamic> toMap() {
@@ -50,6 +54,8 @@ class Patient {
       'birthDate': birthDate?.toIso8601String(),
       'edition': edition,
       'status': status,
+      'weight': weight ?? '',
+      'bloodPressure': bloodPressure ?? '',
     };
     if (id != null) {
       map['id'] = id;
@@ -74,7 +80,9 @@ class Patient {
           ? null
           : DateTime.parse(data['birthDate'].toString()),
       edition: data['edition'].toString(),
-      status: int.parse(data['status'].toString()),
+      status: int.tryParse(data['status'].toString()),
+      weight: data['weight'].toString(),
+      bloodPressure: data['bloodPressure'].toString(),
     );
   }
 
@@ -93,6 +101,8 @@ class Patient {
     DateTime? birthDate,
     String? edition,
     int? status,
+    String? weight,
+    String? bloodPressure,
   }) {
     return Patient(
       id: id ?? this.id,
@@ -105,6 +115,8 @@ class Patient {
       observation: observation ?? this.observation,
       edition: edition ?? this.edition,
       status: status ?? this.status,
+      weight: weight ?? this.weight,
+      bloodPressure: bloodPressure ?? this.bloodPressure,
     );
   }
 }

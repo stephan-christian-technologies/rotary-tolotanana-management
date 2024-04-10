@@ -4,6 +4,7 @@ import 'package:appcenter_sdk_flutter/appcenter_sdk_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:rc_rtc_tolotanana/firebase_options.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 
@@ -49,7 +50,7 @@ Future<void> main() async {
   const Duration syncInterval = Duration(seconds: 60);
   Timer.periodic(syncInterval, (Timer timer) async {
     print("Synchronisation des données avec Firebase");
-    await databaseClient.syncAllDataWithFirebase();
+    await databaseClient.syncAllDataWithFirebase().then((value) => Get.snackbar('Synchronisation', 'Sync terminée'));
     // Vous pouvez également effectuer d'autres actions après la synchronisation...
   });
 

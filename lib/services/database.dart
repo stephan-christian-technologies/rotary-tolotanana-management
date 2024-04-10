@@ -1,11 +1,15 @@
 import 'dart:io';
 
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:rc_rtc_tolotanana/models/operation.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/models/patient_operation.dart';
+import 'package:rc_rtc_tolotanana/views/pages/home.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
@@ -55,6 +59,8 @@ class DatabaseClient {
           birthDate TEXT NOT NULL,
           edition INTEGER,
           status INTEGER,
+          weight INTEGER,
+          bloodPressure TEXT,
           FOREIGN KEY(edition) REFERENCES edition(id)
         )
       ''');
@@ -151,6 +157,7 @@ class DatabaseClient {
   }
 
   Future<void> syncFirebaseDataToLocalStorage() async {
+    print('Synchronisation des données depuis Firebase...');
     List<Edition> editions = await _getEditionsFromFirebase();
     List<Patient> patients = await _getPatientsFromFirebase();
     List<PatientOperation> patientOperations =
@@ -166,6 +173,7 @@ class DatabaseClient {
   }
 
   Future<List<Edition>> _getEditionsFromFirebase() async {
+    print('Getting editions from Firebase...');
     List<Edition> editions = [];
     DataSnapshot dataSnapshot = await _editionsRef.get();
     Map<dynamic, dynamic> editionsMap =
@@ -186,6 +194,7 @@ class DatabaseClient {
   }
 
   Future<List<Patient>> _getPatientsFromFirebase() async {
+    print('Getting patients from Firebase...');
     List<Patient> patients = [];
     DataSnapshot dataSnapshot = await _patientsRef.get();
     Map<dynamic, dynamic> patientsMap =
@@ -204,6 +213,8 @@ class DatabaseClient {
       final edition = value['edition'];
       final birthDate = value['birthDate'];
       final comment = value['comment'] ?? '';
+      final weight = value['weight'] ?? '';
+      final bloodPressure = value['bloodPressure'] ?? '';
 
       patients.add(Patient(
           id: id,
@@ -218,12 +229,15 @@ class DatabaseClient {
           telephone: telephone,
           observation: observation,
           edition: edition,
-          comment: comment));
+          comment: comment,
+          weight: weight,
+          bloodPressure: bloodPressure));
     });
     return patients;
   }
 
   Future<List<PatientOperation>> _getPatientOperationsFromFirebase() async {
+    print('Getting patient operations from Firebase...');
     List<PatientOperation> patientOperations = [];
     DataSnapshot dataSnapshot = await _patientOperationsRef.get();
     Map<dynamic, dynamic> patientOperationsMap =
@@ -255,12 +269,14 @@ class DatabaseClient {
   }
 
   Future<void> syncEditionsToLocalStorage(List<Edition> editions) async {
+    print('Syncing editions to local storage...');
     for (Edition edition in editions) {
       await addEdition(edition.id, edition.year, edition.city);
     }
   }
 
   Future<void> syncPatientsToLocalStorage(List<Patient> patients) async {
+    print('Syncing patients to local storage...');
     for (Patient patient in patients) {
       await insert(patient);
     }
@@ -268,6 +284,7 @@ class DatabaseClient {
 
   Future<void> syncPatientOperationsToLocalStorage(
       List<PatientOperation> patientOperations) async {
+    print('Syncing patient operations to local storage...');
     for (PatientOperation patientOperation in patientOperations) {
       await addPatientOperation(
           patientOperation.id,
@@ -502,11 +519,14 @@ class DatabaseClient {
 
   //get patients by edition id
   Future<List<Patient>> getPatientsByEditionId(String editionId) async {
+    List<Patient> patients = [];
+    Logger().i('Edition ID: $editionId');
     Database db = await database;
     const query = 'SELECT * FROM patient WHERE edition = ?';
     List<Map<String, dynamic>> results = await db.rawQuery(query, [editionId]);
-
-    return results.map((map) => Patient.fromMap(map)).toList();
+    Logger().i('Results: $results');
+    patients = results.map((map) => Patient.fromMap(map)).toList();
+    return patients;
   }
 
   //get patient_operation by patient id, group by patient id

@@ -46,6 +46,8 @@ dependencies:
   open_filex: ^4.3.4
   flutter_slidable: ^3.0.1
   appcenter_sdk_flutter: ^0.5.1
+  get: ^4.6.6
+  logger: ^2.2.0
 
 dev_dependencies:
   flutter_test:

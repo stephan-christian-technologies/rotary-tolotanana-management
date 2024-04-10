@@ -30,6 +30,7 @@ class _HomeState extends State<Home> {
         titleString: "Liste des éditions",
         buttonTitle: "Ajouter",
         callback: addEdition,
+        callback2: getEditions,
       ),
       body: ListView.builder(
           itemBuilder: ((context, index) {

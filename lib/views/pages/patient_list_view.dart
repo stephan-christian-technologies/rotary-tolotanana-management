@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:logger/logger.dart';
 import 'package:rc_rtc_tolotanana/models/edition.dart';
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
@@ -128,6 +129,7 @@ class _PatientListViewState extends State<PatientListView> {
           : DatabaseClient().getPatientsByEditionId(widget.edition.id),
       builder: (BuildContext context, AsyncSnapshot<List<Patient>> snapshot) {
         if (snapshot.hasError) {
+          Logger().e(snapshot.error.toString());
           return const Center(child: Text('Erreur de chargement des données'));
         } else if (snapshot.hasData) {
           final patients = snapshot.data!;

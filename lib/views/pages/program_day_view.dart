@@ -257,7 +257,15 @@ class _ProgramDayViewState extends State<ProgramDayView> {
                             backgroundColor: Colors.blue,
                             foregroundColor: Colors.white,
                             label: '5',
-                          )
+                          ),
+                          SlidableAction(
+                            onPressed: (context) {
+                              updateStatus(6, patient);
+                            },
+                            backgroundColor: Colors.purple,
+                            foregroundColor: Colors.white,
+                            label: '6',
+                          ),
                         ],
                       ),
                       child: GestureDetector(

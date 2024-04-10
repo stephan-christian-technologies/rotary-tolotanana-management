@@ -32,6 +32,8 @@ class _AddPatientViewState extends State<AddPatientView> {
   late AnesthesiaType? typeAnesthesieController;
   late int? observationController;
   late TextEditingController commentaireController;
+  late TextEditingController weightController;
+  late TextEditingController bloodPressureController;
   late TextEditingController dateNaissanceController;
 
   @override
@@ -48,6 +50,8 @@ class _AddPatientViewState extends State<AddPatientView> {
     observationController = null;
     commentaireController = TextEditingController();
     dateNaissanceController = TextEditingController();
+    weightController = TextEditingController();
+    bloodPressureController = TextEditingController();
 
     super.initState();
   }
@@ -327,6 +331,27 @@ class _AddPatientViewState extends State<AddPatientView> {
                   ),
                 ),
                 TextField(
+                  controller: weightController,
+                  decoration: const InputDecoration(
+                    hintText: 'Poids',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                    labelText: 'Poids',
+                  ),
+                  keyboardType: TextInputType.number),
+                TextField(
+                  controller: bloodPressureController,
+                  decoration: const InputDecoration(
+                    hintText: 'Tension artérielle',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                    ),
+                    labelText: 'Tension artérielle',
+                  ),
+                  keyboardType: TextInputType.number,
+                ),
+                TextField(
                   controller: commentaireController,
                   decoration: const InputDecoration(
                     hintText: 'Commentaire',
@@ -363,6 +388,8 @@ class _AddPatientViewState extends State<AddPatientView> {
     map['observation'] = observationController;
     map['comment'] = commentaireController.text;
     map['birthDate'] = dateNaissanceController.text;
+    map['weight'] = weightController.text;
+    map['bloodPressure'] = bloodPressureController.text;
     map['status'] = 0;
 
     const uuid = Uuid();
