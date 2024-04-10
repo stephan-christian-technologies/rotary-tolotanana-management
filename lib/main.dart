@@ -47,7 +47,7 @@ Future<void> main() async {
   await databaseClient.syncAllDataWithFirebase();
 
   // Définir un Timer pour synchroniser les données toutes les heures
-  const Duration syncInterval = Duration(seconds: 60);
+  const Duration syncInterval = Duration(seconds: 30);
   Timer.periodic(syncInterval, (Timer timer) async {
     print("Synchronisation des données avec Firebase");
     await databaseClient.syncAllDataWithFirebase().then((value) => Get.snackbar('Synchronisation', 'Sync terminée'));

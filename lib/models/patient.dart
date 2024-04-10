@@ -17,7 +17,7 @@ class Patient {
   String? address;
   DateTime? birthDate;
   String edition;
-  int? status;
+  int status;
   String? weight;
   String? bloodPressure;
 
@@ -34,7 +34,7 @@ class Patient {
       this.comment,
       this.address,
       this.birthDate,
-      this.status,
+      required this.status,
       this.weight,
       this.bloodPressure,
       required this.edition});
@@ -80,7 +80,7 @@ class Patient {
           ? null
           : DateTime.parse(data['birthDate'].toString()),
       edition: data['edition'].toString(),
-      status: int.tryParse(data['status'].toString()),
+      status: int.parse(data['status'].toString()),
       weight: data['weight'].toString(),
       bloodPressure: data['bloodPressure'].toString(),
     );

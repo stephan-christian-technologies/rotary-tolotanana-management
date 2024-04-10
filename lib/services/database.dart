@@ -215,6 +215,7 @@ class DatabaseClient {
       final comment = value['comment'] ?? '';
       final weight = value['weight'] ?? '';
       final bloodPressure = value['bloodPressure'] ?? '';
+      final status = value['status'];
 
       patients.add(Patient(
           id: id,
@@ -231,7 +232,8 @@ class DatabaseClient {
           edition: edition,
           comment: comment,
           weight: weight,
-          bloodPressure: bloodPressure));
+          bloodPressure: bloodPressure,
+          status: status));
     });
     return patients;
   }
