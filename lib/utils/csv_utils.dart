@@ -9,6 +9,7 @@ import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:rc_rtc_tolotanana/utils/utils.dart';
 import 'package:share_plus/share_plus.dart';
 
 Future<void> patientsByEditionToCsv(
@@ -89,7 +90,7 @@ Future<void> savePatientsToCsv(
   // Get the document directory
   final directory = await getExternalStorageDirectory();
   final path = status == null ?
-      '${directory?.path}/patients_${edition.city}_${edition.year}.csv' : '${directory?.path}/patients_${edition.city}_${edition.year}_$status.csv';
+      '${directory?.path}/patients_${edition.city}_${edition.year}.csv' : '${directory?.path}/patients_${edition.city}_${edition.year}_${getStatusDetails(status)['day']}.csv';
 
   // Write the CSV string to a file
   await File(path).writeAsString(csvString);
