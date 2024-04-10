@@ -1,6 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:rc_rtc_tolotanana/models/edition.dart';
 
 import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
@@ -57,8 +58,8 @@ class _ProgramDayViewState extends State<ProgramDayView> {
             IconButton(
               icon: const Icon(Icons.file_download),
               onPressed: () async {
-                // await patientsByEditionToCsv(widget.edition, context);
-              },
+                final patients = await DatabaseClient().getPatientByStatus(widget.day);
+                await savePatientsToCsv(patients, context, Edition('', 2024, 'Mahajanga '), status: widget.day );},
             ),
           if (_isSelecting)
             TextButton(

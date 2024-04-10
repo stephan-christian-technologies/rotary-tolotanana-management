@@ -9,6 +9,7 @@ import 'package:rc_rtc_tolotanana/models/patient.dart';
 import 'package:rc_rtc_tolotanana/services/database.dart';
 import 'package:csv/csv.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 Future<void> patientsByEditionToCsv(
     Edition edition, BuildContext context) async {
@@ -16,8 +17,15 @@ Future<void> patientsByEditionToCsv(
   await savePatientsToCsv(patients, context, edition);
 }
 
+Future<void> patientsByStatusByEditionToCsv(
+    Edition edition, int status, BuildContext context) async {
+  final patients =
+      await DatabaseClient().getPatientsByStatusByEditionId(edition.id, status);
+  await savePatientsToCsv(patients, context, edition, status: status);
+}
+
 Future<void> savePatientsToCsv(
-    List<Patient> patients, BuildContext context, Edition edition) async {
+    List<Patient> patients, BuildContext context, Edition edition, {int? status}) async {
   final csvData = <List<dynamic>>[];
 
   // Add CSV header
@@ -34,6 +42,8 @@ Future<void> savePatientsToCsv(
     'comment',
     'address',
     'birthDate',
+    'weight',
+    'bloodPressure',
   ]);
 
   int count = 0;
@@ -67,6 +77,8 @@ Future<void> savePatientsToCsv(
       patient.comment ?? '-',
       patient.address ?? '-',
       patient.birthDate?.toIso8601String().split('T').first,
+      patient.weight ?? '-',
+      patient.bloodPressure ?? '-',
     ]);
   }
 
@@ -76,8 +88,8 @@ Future<void> savePatientsToCsv(
 
   // Get the document directory
   final directory = await getExternalStorageDirectory();
-  final path =
-      '${directory?.path}/patients_${edition.city}_${edition.year}.csv';
+  final path = status == null ?
+      '${directory?.path}/patients_${edition.city}_${edition.year}.csv' : '${directory?.path}/patients_${edition.city}_${edition.year}_$status.csv';
 
   // Write the CSV string to a file
   await File(path).writeAsString(csvString);
@@ -109,6 +121,8 @@ Future<void> savePatientsToCsv(
             child: const Text('Partager'),
             onPressed: () async {
               print('Sharing $path...');
+              Navigator.of(context).pop();
+              await Share.shareFiles([(path)]);
             },
           ),
         ],

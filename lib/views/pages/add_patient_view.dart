@@ -330,37 +330,47 @@ class _AddPatientViewState extends State<AddPatientView> {
                     ),
                   ),
                 ),
-                TextField(
-                  controller: weightController,
-                  decoration: const InputDecoration(
-                    hintText: 'Poids',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: weightController,
+                    decoration: const InputDecoration(
+                      hintText: 'Poids',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                      labelText: 'Poids',
                     ),
-                    labelText: 'Poids',
-                  ),
-                  keyboardType: TextInputType.number),
-                TextField(
-                  controller: bloodPressureController,
-                  decoration: const InputDecoration(
-                    hintText: 'Tension artérielle',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
-                    ),
-                    labelText: 'Tension artérielle',
-                  ),
-                  keyboardType: TextInputType.number,
+                    keyboardType: TextInputType.number),
                 ),
-                TextField(
-                  controller: commentaireController,
-                  decoration: const InputDecoration(
-                    hintText: 'Commentaire',
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: bloodPressureController,
+                    decoration: const InputDecoration(
+                      hintText: 'Tension artérielle',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                      labelText: 'Tension artérielle',
                     ),
-                    labelText: 'Commentaire',
+                    keyboardType: TextInputType.number,
                   ),
-                  maxLines: 5,
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: TextField(
+                    controller: commentaireController,
+                    decoration: const InputDecoration(
+                      hintText: 'Commentaire',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8.0)),
+                      ),
+                      labelText: 'Commentaire',
+                    ),
+                    maxLines: 5,
+                  ),
                 ),
               ],
             ),

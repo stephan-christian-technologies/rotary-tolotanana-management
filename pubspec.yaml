@@ -48,6 +48,7 @@ dependencies:
   appcenter_sdk_flutter: ^0.5.1
   get: ^4.6.6
   logger: ^2.2.0
+  share_plus: ^7.2.2
 
 dev_dependencies:
   flutter_test:

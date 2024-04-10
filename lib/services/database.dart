@@ -452,9 +452,20 @@ class DatabaseClient {
   }
 
   Future<List<Patient>> getPatientByStatus(int status) async {
+    Logger().i('Getting patients by Status: $status');
     Database db = await database;
     const query = 'SELECT * FROM patient WHERE status = ?';
     List<Map<String, dynamic>> results = await db.rawQuery(query, [status]);
+    Logger().i('Results: $results');
+    return results.map((map) => Patient.fromMap(map)).toList();
+  }
+
+  Future<List<Patient>> getPatientsByStatusByEditionId(
+      String editionId, int status) async {
+    Database db = await database;
+    const query = 'SELECT * FROM patient WHERE edition = ? AND status = ?';
+    List<Map<String, dynamic>> results =
+        await db.rawQuery(query, [editionId, status]);
     return results.map((map) => Patient.fromMap(map)).toList();
   }
 
