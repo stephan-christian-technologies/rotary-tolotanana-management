@@ -135,6 +135,12 @@ class _ProgramDayViewState extends State<ProgramDayView> {
                                   await groupUpdateStatus(context, 5);
                                 },
                                 child: const Text('Vendredi')),
+                            TextButton(
+                                onPressed: () async {
+                                  await groupUpdateStatus(context, 6);
+                                },
+                                child: const Text('STANDBY')
+                            )
                           ]),
                         );
                       });
